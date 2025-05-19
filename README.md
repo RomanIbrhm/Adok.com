@@ -4,7 +4,7 @@ Aplikasi komparasi handphone berbasis website
 
 ADOK adalah sebuah platform web interaktif yang memudahkan pengguna dalam mencari, membandingkan, dan menganalisis berbagai jenis smartphone berdasarkan spesifikasi, harga, merek, dan performa. Website ini bertujuan untuk membantu pengguna membuat keputusan pembelian yang lebih bijak dan tepat.
 
-###1.NavBar
+#1.NavBar
 - Logo
 - Menu Utama
   - Home
@@ -12,13 +12,13 @@ ADOK adalah sebuah platform web interaktif yang memudahkan pengguna dalam mencar
   - Artikel
   - Tentang Kami
 
-###2. Pencarian & Filter
+#2. Pencarian & Filter
 - Nama Smartphone
 - Merek
 - Harga
 - RAM
 
-###3. Daftar Smartphone
+#3. Daftar Smartphone
 - Gambar Smartphone
 - Nama Produk
 - Rating Smartphone
@@ -27,16 +27,16 @@ ADOK adalah sebuah platform web interaktif yang memudahkan pengguna dalam mencar
 - Tombol Detail
 - Tombol Tambah Perbandingan
 
-###4. Perbandingan
+#4. Perbandingan
 - Spesifikasi Teknis
 - Perbandigan Harga
 - Kelebihan dan Kekurangan
 - Rekomendasi Pembelian
 
-###5. Teknologi Digunakan
+#5. Teknologi Digunakan
 - Frontend : HTML, Tailwind CSS
 
-##FITUR UTAMA
+#FITUR UTAMA
 - Pencarian Smartphone
 - Perbandingan Spesifikasi antar Smartphone
 - Rating & Ulasan
