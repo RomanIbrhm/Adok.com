@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TechCompare - Bandingkan Smartphone Terbaik</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <!-- Alpine.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.10.3/cdn.min.js" defer></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+  <style>
+    .transition-all {
+      transition: all 0.3s ease;
+    }
+    .comparison-highlight {
+      background-color: rgba(16, 185, 129, 0.1);
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800 antialiased" x-data="appData()">
+  <!-- Navbar -->
+  <nav class="bg-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex">
+          <div class="flex-shrink-0 flex items-center">
+            <span class="text-emerald-600 font-bold text-2xl">TechCompare</span>
+          </div>
+          <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+            <a href="#" class="border-emerald-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" x-on:click.prevent="currentPage = 'home'">
+              Home
+            </a>
+            <a href="#" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" x-on:click.prevent="currentPage = 'comparison'; if (selectedPhones.length < 2) { showComparisonAlert = true; setTimeout(() => showComparisonAlert = false, 3000) }">
+              Perbandingan
+            </a>
+            <a href="#" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+              Artikel
+            </a>
+            <a href="#" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+              Tentang Kami
+            </a>
+          </div>
+        </div>
+        <div class="hidden sm:ml-6 sm:flex sm:items-center">
+          <div class="flex items-center">
+            <span class="px-4 py-2 rounded-md text-sm font-medium focus:outline-none" x-text="selectedPhones.length > 0 ? `${selectedPhones.length} perangkat dipilih` : ''"></span>
+            <button x-show="selectedPhones.length > 0" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500" x-on:click="currentPage = 'comparison'">
+              Bandingkan
+            </button>
+          </div>
+        </div>
+        <div class="-mr-2 flex items-center sm:hidden">
+          <!-- Mobile menu button -->
+          <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-emerald-500" aria-expanded="false" x-on:click="mobileMenuOpen = !mobileMenuOpen">
+            <span class="sr-only">Buka menu utama</span>
+            <!-- Icon when menu is closed -->
+            <svg x-show="!mobileMenuOpen" class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+            <!-- Icon when menu is open -->
+            <svg x-show="mobileMenuOpen" class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile menu, show/hide based on menu state. -->
+    <div class="sm:hidden" x-show="mobileMenuOpen">
+      <div class="pt-2 pb-3 space-y-1">
+        <a href="#" class="bg-emerald-50 border-emerald-500 text-emerald-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium" x-on:click.prevent="currentPage = 'home'; mobileMenuOpen = false">
+          Home
+        </a>
+        <a href="#" class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium" x-on:click.prevent="currentPage = 'comparison'; mobileMenuOpen = false; if (selectedPhones.length < 2) { showComparisonAlert = true; setTimeout(() => showComparisonAlert = false, 3000) }">
+          Perbandingan
+        </a>
+        <a href="#" class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
+          Artikel
+        </a>
+        <a href="#" class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
+          Tentang Kami
+        </a>
+      </div>
+      <div class="pt-4 pb-3 border-t border-gray-200">
+        <div class="mt-3 px-2 space-y-1">
+          <span x-text="selectedPhones.length > 0 ? `${selectedPhones.length} perangkat dipilih` : ''" class="block px-3 py-2 text-base font-medium text-gray-500"></span>
+          <button x-show="selectedPhones.length > 0" class="w-full text-left block bg-emerald-600 text-white px-3 py-2 rounded-md text-base font-medium" x-on:click="currentPage = 'comparison'; mobileMenuOpen = false">
+            Bandingkan Sekarang
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Alert Message -->
+  <div x-show="showComparisonAlert" class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded-md shadow-lg transition-all z-50">
+    Pilih minimal 2 perangkat untuk membandingkan
+  </div>
+
+  <!-- Home Page Content -->
+  <div x-show="currentPage === 'home'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Hero Section -->
+    <div class="text-center mt-6 mb-12">
+      <h1 class="text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl">Bandingkan Smartphone Terbaik</h1>
+      <p class="max-w-xl mt-5 mx-auto text-xl text-gray-500">Temukan dan bandingkan spesifikasi smartphone untuk membantu keputusan pembelian Anda.</p>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+      <div class="flex flex-col md:flex-row gap-4">
+        <div class="flex-grow">
+          <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Cari Smartphone</label>
+          <div class="mt-1 relative rounded-md shadow-sm">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <i class="fas fa-search text-gray-400"></i>
+            </div>
+            <input type="text" name="search" id="search" x-model="searchQuery" class="focus:ring-emerald-500 focus:border-emerald-500 block w-full pl-10 pr-12 sm:text-sm border-gray-300 rounded-md py-3" placeholder="iPhone 13 Pro, Samsung Galaxy S22...">
+          </div>
+        </div>
+        
+        <div class="w-full md:w-48">
+          <label for="brand" class="block text-sm font-medium text-gray-700 mb-1">Merek</label>
+          <select id="brand" x-model="filters.brand" class="mt-1 block w-full py-3 pl-3 pr-10 text-base border-gray-300 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm rounded-md">
+            <option value="">Semua Merek</option>
+            <option>Apple</option>
+            <option>Samsung</option>
+            <option>Xiaomi</option>
+            <option>Google</option>
+            <option>OPPO</option>
+            <option>Vivo</option>
+          </select>
+        </div>
+        
+        <div class="w-full md:w-48">
+          <label for="price" class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
+          <select id="price" x-model="filters.price" class="mt-1 block w-full py-3 pl-3 pr-10 text-base border-gray-300 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm rounded-md">
+            <option value="">Semua Harga</option>
+            <option value="budget">< Rp 3 Juta</option>
+            <option value="midrange">Rp 3 - 7 Juta</option>
+            <option value="premium">Rp 7 - 12 Juta</option>
+            <option value="flagship">> Rp 12 Juta</option>
+          </select>
+        </div>
+        
+        <div class="w-full md:w-48">
+          <label for="ram" class="block text-sm font-medium text-gray-700 mb-1">RAM</label>
+          <select id="ram" x-model="filters.ram" class="mt-1 block w-full py-3 pl-3 pr-10 text-base border-gray-300 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm rounded-md">
+            <option value="">Semua RAM</option>
+            <option value="4">4GB</option>
+            <option value="6">6GB</option>
+            <option value="8">8GB</option>
+            <option value="12">12GB+</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="mt-4 flex flex-wrap gap-2">
+        <template x-for="(value, key) in activeFilters" :key="key">
+          <div x-show="value !== ''" class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-800">
+            <span x-text="formatFilterLabel(key, value)"></span>
+            <button type="button" class="ml-1 flex-shrink-0 inline-flex text-emerald-500 focus:outline-none" x-on:click="clearFilter(key)">
+              <span class="sr-only">Remove filter</span>
+              <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </template>
+        <button x-show="hasActiveFilters" type="button" class="inline-flex items-center px-3 py-1 border border-gray-300 rounded-full text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" x-on:click="clearAllFilters">
+          Hapus Semua Filter
+        </button>
+      </div>
+    </div>
+
+    <!-- Smartphone Grid -->
+    <div class="mt-8">
+      <h2 class="text-xl font-bold text-gray-900 mb-6">Smartphone Tersedia</h2>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <template x-for="phone in filteredPhones" :key="phone.id">
+          <div class="bg-white rounded-lg shadow-md overflow-hidden transition-all hover:shadow-xl">
+            <div class="relative">
+              <img :src="phone.image" :alt="phone.name" class="w-full h-48 object-contain p-4">
+              <div class="absolute top-2 right-2">
+                <button 
+                  class="h-10 w-10 rounded-full flex items-center justify-center focus:outline-none transition-colors"
+                  :class="isPhoneSelected(phone.id) ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'"
+                  x-on:click="togglePhoneSelection(phone.id)"
+                >
+                  <i class="fas" :class="isPhoneSelected(phone.id) ? 'fa-check' : 'fa-plus'"></i>
+                </button>
+              </div>
+            </div>
+            <div class="p-5">
+              <h3 class="text-lg font-semibold text-gray-900 mb-1" x-text="phone.name"></h3>
+              <div class="flex items-center mb-2">
+                <div class="flex items-center">
+                  <template x-for="i in 5" :key="i">
+                    <i class="fas fa-star text-sm" :class="i <= phone.rating ? 'text-yellow-400' : 'text-gray-300'"></i>
+                  </template>
+                  <span class="ml-1 text-sm text-gray-600" x-text="phone.rating + '/5'"></span>
+                </div>
+                <span class="mx-2 text-gray-300">|</span>
+                <span class="text-sm text-gray-600" x-text="phone.brand"></span>
+              </div>
+              <div class="flex justify-between items-center">
+                <p class="text-lg font-bold text-emerald-600" x-text="formatPrice(phone.price)"></p>
+                <button class="text-emerald-600 hover:text-emerald-800 font-medium text-sm" x-on:click="phoneDetail = phone; showPhoneDetail = true">
+                  Lihat Detail
+                </button>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+      
+      <!-- No Results Message -->
+      <div x-show="filteredPhones.length === 0" class="text-center py-12">
+        <i class="fas fa-search text-gray-300 text-5xl mb-4"></i>
+        <h3 class="text-lg font-medium text-gray-900">Tidak ada hasil yang ditemukan</h3>
+        <p class="mt-1 text-gray-500">Coba ubah pencarian atau filter Anda.</p>
+        <button class="mt-4 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500" x-on:click="clearAllFilters">
+          Hapus Semua Filter
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comparison Page Content -->
+  <div x-show="currentPage === 'comparison'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">Perbandingan Smartphone</h1>
+
+    <!-- Selected Phones Section -->
+    <div x-show="selectedPhones.length < 2" class="bg-white p-8 rounded-lg shadow-md text-center mb-8">
+      <i class="fas fa-mobile-alt text-gray-300 text-5xl mb-4"></i>
+      <h2 class="text-xl font-medium text-gray-900 mb-2">Pilih Minimal 2 Smartphone untuk Dibandingkan</h2>
+      <p class="text-gray-600 mb-6">Kembali ke halaman utama dan pilih smartphone yang ingin Anda bandingkan.</p>
+      <button class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500" x-on:click="currentPage = 'home'">
+        Kembali ke Halaman Utama
+      </button>
+    </div>
+
+    <!-- Comparison Table -->
+    <div x-show="selectedPhones.length >= 2" class="bg-white rounded-lg shadow-md overflow-hidden">
+      <!-- Selected Phones Header -->
+      <div class="grid" :class="'grid-cols-' + (selectedPhones.length + 1)">
+        <div class="p-4 bg-gray-50 font-medium text-gray-500 border-r border-b border-gray-200">
+          Spesifikasi
+        </div>
+        <template x-for="phoneId in selectedPhones" :key="phoneId">
+          <div class="p-4 bg-gray-50 border-b border-gray-200 text-center relative">
+            <template x-for="phone in phones.filter(p => p.id === phoneId)" :key="phone.id">
+              <div>
+                <img :src="phone.image" :alt="phone.name" class="h-24 mx-auto object-contain">
+                <h3 class="font-bold text-gray-900 mb-1" x-text="phone.name"></h3>
+                <p class="text-emerald-600 font-bold" x-text="formatPrice(phone.price)"></p>
+                <button class="absolute top-2 right-2 h-8 w-8 rounded-full bg-gray-100 text-gray-400 hover:bg-gray-200 flex items-center justify-center focus:outline-none transition-colors" x-on:click="removePhoneFromComparison(phone.id)">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </template>
+          </div>
+        </template>
+      </div>
+
+      <!-- Comparison Content -->
+      <div class="divide-y divide-gray-200">
+        <!-- OS Section -->
+        <div class="grid" :class="'grid-cols-' + (selectedPhones.length + 1)">
+          <div class="p-4 font-medium text-gray-700 bg-gray-50 border-r border-gray-200">
+            Sistem Operasi
+          </div>
+          <template x-for="phoneId in selectedPhones" :key="phoneId">
+            <template x-for="phone in phones.filter(p => p.id === phoneId)" :key="phone.id">
+              <div class="p-4 text-center" :class="getBestInCategory(selectedPhones, 'os') === phone.id ? 'comparison-highlight' : ''">
+                <span x-text="phone.specs.os"></span>
+                <i x-show="getBestInCategory(selectedPhones, 'os') === phone.id" class="fas fa-trophy text-emerald-500 ml-1"></i>
+              </div>
+            </template>
+          </template>
+        </div>
+
+        <!-- Processor Section -->
+        <div class="grid" :class="'grid-cols-' + (selectedPhones.length + 1)">
+          <div class="p-4 font-medium text-gray-700 bg-gray-50 border-r border-gray-200">
+            Prosesor
+          </div>
+          <template x-for="phoneId in selectedPhones" :key="phoneId">
+            <template x-for="phone in phones.filter(p => p.id === phoneId)" :key="phone.id">
+              <div class="p-4 text-center" :class="getBestInCategory(selectedPhones, 'processor') === phone.id ? 'comparison-highlight' : ''">
+                <span x-text="phone.specs.processor"></span>
+                <i x-show="getBestInCategory(selectedPhones, 'processor') === phone.id" class="fas fa-trophy text-emerald-500 ml-1"></i>
+              </div>
+            </template>
+          </template>
+        </div>
+
+        <!-- RAM Section -->
+        <div class="grid" :class="'grid-cols-' + (selectedPhones.length + 1)">
+          <div class="p-4 font-medium text-gray-700 bg-gray-50 border-r border-gray-200">
+            RAM
+          </div>
+          <template x-for="phoneId in selectedPhones" :key="phoneId">
+            <template x-for="phone in phones.filter(p => p.id === phoneId)" :key="phone.id">
+              <div class="p-4 text-center" :class="getBestInCategory(selectedPhones, 'ram') === phone.id ? 'comparison-highlight' : ''">
+                <span x-text="phone.specs.ram + ' GB'"></span>
+                <i x-show="getBestInCategory(selectedPhones, 'ram') === phone.id" class="fas fa-trophy text-emerald-500 ml-1"></i>
+              </div>
+            </template>
+          </template>
+        </div>
+
+        <!-- Storage Section -->
+        <div class="grid" :class="'grid-cols-' + (selectedPhones.length + 1)">
+          <div class="p-4 font-medium text-gray-700 bg-gray-50 border-r border-gray-200">
+            Penyimpanan
+          </div>
+          <template x-for="phoneId in selectedPhones" :key="phoneId">
+            <template x-for="phone in phones.filter(p => p.id === phoneId)" :key="phone.id">
+              <div class="p-4 text-center" :class="getBestInCategory(selectedPhones, 'storage') === phone.id ? 'comparison-highlight' : ''">
+                <span x-text="phone.specs.storage + ' GB'"></span>
+                <i x-show="getBestInCategory(selectedPhones, 'storage') === phone.id" class="fas fa-trophy text-emerald-500 ml-1"></i>
+              </div>
+            </template>
+          </template>
+        </div>
+
+        <!-- Display Section -->
+        <div class="grid" :class="'grid-cols-' + (selectedPhones.length + 1)">
+          <div class="p-4 font-medium text-gray-700 bg-gray-50 border-r border-gray-200">
+            Layar
+          </div>
+          <template x-for="phoneId in selectedPhones" :key="phoneId">
+            <template x-for="phone in phones.filter(p => p.id === phoneId)" :key="phone.id">
+              <div class="p-4 text-center" :class="getBestInCategory(selectedPhones, 'display') === phone.id ? 'comparison-highlight' : ''">
+                <span x-text="phone.specs.display"></span>
+                <i x-show="getBestInCategory(selectedPhones, 'display') === phone.id" class="fas fa-trophy text-emerald-500 ml-1"></i>
+              </div>
+            </template>
+          </template>
+        </div>
+
+        <!-- Camera Section -->
+        <div class="grid" :class="'grid-cols-' + (selectedPhones.length + 1)">
+          <div class="p-4 font-medium text-gray-700 bg-gray-50 border-r border-gray-200">
+            Kamera Utama
+          </div>
+          <template x-for="phoneId in selectedPhones" :key="phoneId">
+            <template x-for="phone in phones.filter(p => p.id === phoneId)" :key="phone.id">
+              <div class="p-4 text-center" :class="getBestInCategory(selectedPhones, 'mainCamera') === phone.id ? 'comparison-highlight' : ''">
+                <span x-text="phone.specs.mainCamera"></span>
+                <i x-show="getBestInCategory(selectedPhones, 'mainCamera') === phone.id" class="fas fa-trophy text-emerald-500 ml-1"></i>
+              </div>
+            </template>
+          </template>
+        </div>
+
+        <!-- Selfie Camera Section -->
+        <div class="grid" :class="'grid-cols-' + (selectedPhones.length + 1)">
+          <div class="p-4 font-medium text-gray-700 bg-gray-50 border-r border-gray-200">
+            Kamera Selfie
+          </div>
+          <template x-for="phoneId in selectedPhones" :key="phoneId">
+            <template x-for="phone in phones.filter(p => p.id === phoneId)" :key="phone.id">
+              <div class="p-4 text-center" :class="getBestInCategory(selectedPhones, 'selfieCamera') === phone.id ? 'comparison-highlight' : ''">
+                <span x-text="phone.specs.selfieCamera"></span>
+                <i x-show="getBestInCategory(selectedPhones, 'selfieCamera') === phone.id" class="fas fa-trophy text-emerald-500 ml-1"></i>
+              </div>
+            </template>
+          </template>
+        </div>
+
+        <!-- Battery Section -->
+        <div class="grid" :class="'grid-cols-' + (selectedPhones.length + 1)">
+          <div class="p-4 font-medium text-gray-700 bg-gray-50 border-r border-gray-200">
+            Baterai
+          </div>
+          <template x-for="phoneId in selectedPhones" :key="phoneId">
+            <template x-for="phone in phones.filter(p => p.id === phoneId)" :key="phone.id">
+              <div class="p-4 text-center" :class="getBestInCategory(selectedPhones, 'battery') === phone.id ? 'comparison-highlight' : ''">
+                <span x-text="phone.specs.battery + ' mAh'"></span>
+                <i x-show="getBestInCategory(selectedPhones, 'battery') === phone.id" class="fas fa-trophy text-emerald-500 ml-1"></i>
+              </div>
+            </template>
+          </template>
+        </div>
+
+        <!-- Fast Charging Section -->
+        <div class="grid" :class="'grid-cols-' + (selectedPhones.length + 1)">
+          <div class="p-4 font-medium text-gray-700 bg-gray-50 border-r border-gray-200">
+            Fast Charging
+          </div>
+          <template x-for="phoneId in selectedPhones" :key="phoneId">
+            <template x-for="phone in phones.filter(p => p.id === phoneId)" :key="phone.id">
+              <div class="p-4 text-center" :class="getBestInCategory(selectedPhones, 'charging') === phone.id ? 'comparison-highlight' : ''">
+                <span x-text="phone.specs.charging + ' W'"></span>
+                <i x-show="getBestInCategory(selectedPhones, 'charging') === phone.id" class="fas fa-trophy text-emerald-500 ml-1"></i>
+              </div>
+            </template>
+          </template>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phone Detail Modal -->
+  <div x-show="showPhoneDetail" class="fixed inset-0 overflow-y-auto z-50" x-cloak>
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 transition-opacity" aria-hidden="true" x-on:click="showPhoneDetail = false">
+        <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+      </div>
+
+      <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+          <div class="flex justify-between items-start">
+            <h3 class="text-lg leading-6 font-medium text-gray-900" x-text="phoneDetail.name"></h3>
+            <button class="text-gray-400 hover:text-gray-500" x-on:click="showPhoneDetail = false">
+              <span class="sr-only">Close</span>
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="mt-4">
+            <div class="flex flex-col sm:flex-row">
+              <div class="sm:w-1/3 flex-shrink-0">
+                <img :src="phoneDetail.image" :alt="phoneDetail.name" class="w-full object-contain h-48">
+              </div>
+              <div class="mt-4 sm:mt-0 sm:ml-4 sm:w-2/3">
+                <div class="flex items-center mb-2">
+                  <template x-for="i in 5" :key="i">
+                    <i class="fas fa-star text-sm" :class="i <= phoneDetail.rating ? 'text-yellow-400' : 'text-gray-300'"></i>
+                  </template>
+                  <span class="ml-1 text-sm text-gray-600" x-text="phoneDetail.rating + '/5'"></span>
+                </div>
+                <p class="text-lg font-bold text-emerald-600 mb-2" x-text="formatPrice(phoneDetail.price)"></p>
+                <div class="text-sm text-gray-500">
+                  <p class="mb-1"><span class="font-medium text-gray-700">Merek:</span> <span x-text="phoneDetail.brand"></span></p>
+                  <p class="mb-1"><span class="font-medium text-gray-700">Sistem Operasi:</span> <span x-text="phoneDetail.specs.os"></span></p>
+                  <p class="mb-1"><span class="font-medium text-gray-700">Prosesor:</span> <span x-text="phoneDetail.specs.processor"></span></p>
+                  <p class="mb-1"><span class="font-medium text-gray-700">RAM:</span> <span x-text="phoneDetail.specs.ram + ' GB'"></span></p>
+                  <p class="mb-1"><span class="font-medium text-gray-700">Penyimpanan:</span> <span x-text="phoneDetail.specs.storage + ' GB'"></span></p>
+                </div>
+              </div>
+            </div>
+            <div class="mt-6">
+              <h4 class="font-medium text-gray-900 mb-2">Spesifikasi Detail</h4>
+              <dl class="space-y-3 text-sm">
+                <div class="grid grid-cols-3 gap-4">
+                  <dt class="font-medium text-gray-500">Layar</dt>
+                  <dd class="col-span-2 text-gray-900" x-text="phoneDetail.specs.display"></dd>
+                </div>
+                <div class="grid grid-cols-3 gap-4">
+                  <dt class="font-medium text-gray-500">Kamera Utama</dt>
+                  <dd class="col-span-2 text-gray-900" x-text="phoneDetail.specs.mainCamera"></dd>
+                </div>
+                <div class="grid grid-cols-3 gap-4">
+                  <dt class="font-medium text-gray-500">Kamera Selfie</dt>
+                  <dd class="col-span-2 text-gray-900" x-text="phoneDetail.specs.selfieCamera"></dd>
+                </div>
+                <div class="grid grid-cols-3 gap-4">
+                  <dt class="font-medium text-gray-500">Baterai</dt>
+                  <dd class="col-span-2 text-gray-900" x-text="phoneDetail.specs.battery + ' mAh'"></dd>
+                </div>
+                <div class="grid grid-cols-3 gap-4">
+                  <dt class="font-medium text-gray-500">Fast Charging</dt>
+                  <dd class="col-span-2 text-gray-900" x-text="phoneDetail.specs.charging + ' W'"></dd>
+                </div>
+                <div class="grid grid-cols-3 gap-4">
+                  <dt class="font-medium text-gray-500">Dimensi</dt>
+                  <dd class="col-span-2 text-gray-900" x-text="phoneDetail.specs.dimensions"></dd>
+                </div>
+                <div class="grid grid-cols-3 gap-4">
+                  <dt class="font-medium text-gray-500">Berat</dt>
+                  <dd class="col-span-2 text-gray-900" x-text="phoneDetail.specs.weight + ' g'"></dd>
+                </div>
+                <div class="grid grid-cols-3 gap-4">
+                  <dt class="font-medium text-gray-500">Fitur Lainnya</dt>
+                  <dd class="col-span-2 text-gray-900">
+                    <ul class="list-disc pl-5 space-y-1">
+                      <template x-for="feature in phoneDetail.specs.features" :key="feature">
+                        <li x-text="feature"></li>
+                      </template>
+                    </ul>
+                  </dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+        </div>
+        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+          <button type="button" 
+            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-emerald-600 text-base font-medium text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors"
+            :class="isPhoneSelected(phoneDetail.id) ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500' : ''"
+            x-on:click="togglePhoneSelection(phoneDetail.id)"
+            x-text="isPhoneSelected(phoneDetail.id) ? 'Hapus dari Perbandingan' : 'Tambahkan ke Perbandingan'"
+          >
+          </button>
+          <button type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors" x-on:click="showPhoneDetail = false">
+            Tutup
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-white mt-12">
+    <div class="max-w-7xl mx-auto py-12 px-4 overflow-hidden sm:px-6 lg:px-8">
+      <nav class="-mx-5 -my-2 flex flex-wrap justify-center" aria-label="Footer">
+        <div class="px-5 py-2">
+          <a href="#" class="text-base text-gray-500 hover:text-gray-900">
+            Tentang Kami
+          </a>
+        </div>
+        <div class="px-5 py-2">
+          <a href="#" class="text-base text-gray-500 hover:text-gray-900">
+            Kebijakan Privasi
+          </a>
+        </div>
+        <div class="px-5 py-2">
+          <a href="#" class="text-base text-gray-500 hover:text-gray-900">
+            Syarat dan Ketentuan
+          </a>
+        </div>
+        <div class="px-5 py-2">
+          <a href="#" class="text-base text-gray-500 hover:text-gray-900">
+            Kontak
+          </a>
+        </div>
+      </nav>
+      <div class="mt-8 flex justify-center space-x-6">
+        <a href="#" class="text-gray-400 hover:text-gray-500">
+          <span class="sr-only">Facebook</span>
+          <i class="fab fa-facebook text-xl"></i>
+        </a>
+        <a href="#" class="text-gray-400 hover:text-gray-500">
+          <span class="sr-only">Instagram</span>
+          <i class="fab fa-instagram text-xl"></i>
+        </a>
+        <a href="#" class="text-gray-400 hover:text-gray-500">
+          <span class="sr-only">Twitter</span>
+          <i class="fab fa-twitter text-xl"></i>
+        </a>
+        <a href="#" class="text-gray-400 hover:text-gray-500">
+          <span class="sr-only">YouTube</span>
+          <i class="fab fa-youtube text-xl"></i>
+        </a>
+      </div>
+      <p class="mt-8 text-center text-base text-gray-400">
+        &copy; 2025 TechCompare. All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    function appData() {
+      return {
+        currentPage: 'home',
+        mobileMenuOpen: false,
+        showPhoneDetail: false,
+        showComparisonAlert: false,
+        phoneDetail: {},
+        searchQuery: '',
+        filters: {
+          brand: '',
+          price: '',
+          ram: ''
+        },
+        selectedPhones: [],
+        
+        // Smartphone Data
+        phones: [
+          {
+            id: 1,
+            name: "iPhone 14 Pro Max",
+            brand: "Apple",
+            price: 19999000,
+            rating: 4.8,
+            image: "/api/placeholder/300/300",
+            specs: {
+              os: "iOS 16",
+              processor: "Apple A16 Bionic",
+              ram: 6,
+              storage: 256,
+              display: "6.7 inch, Super Retina XDR OLED, 120Hz",
+              mainCamera: "48MP (Wide) + 12MP (Ultra-wide) + 12MP (Telephoto)",
+              selfieCamera: "12MP TrueDepth",
+              battery: 4323,
+              charging: 27,
+              dimensions: "160.7 x 77.6 x 7.9 mm",
+              weight: 240,
+              features: ["Face ID", "MagSafe Charging", "Dynamic Island", "Always-on Display", "Emergency SOS via satellite"]
+            }
+          },
+          {
+            id: 2,
+            name: "Samsung Galaxy S22 Ultra",
+            brand: "Samsung",
+            price: 17999000,
+            rating: 4.7,
+            image: "/api/placeholder/300/300",
+            specs: {
+              os: "Android 12, One UI 4.1",
+              processor: "Snapdragon 8 Gen 1",
+              ram: 12,
+              storage: 256,
+              display: "6.8 inch, Dynamic AMOLED 2X, 120Hz",
+              mainCamera: "108MP (Wide) + 12MP (Ultra-wide) + 10MP (Telephoto) + 10MP (Periscope)",
+              selfieCamera: "40MP",
+              battery: 5000,
+              charging: 45,
+              dimensions: "163.3 x 77.9 x 8.9 mm",
+              weight: 228,
+              features: ["S Pen Support", "IP68 water resistance", "Wireless PowerShare", "Samsung DeX", "Ultra Wideband (UWB)"]
+            }
+          },
+          {
+            id: 3,
+            name: "Google Pixel 7 Pro",
+            brand: "Google",
+            price: 13999000,
+            rating: 4.6,
+            image: "/api/placeholder/300/300",
+            specs: {
+              os: "Android 13",
+              processor: "Google Tensor G2",
+              ram: 12,
+              storage: 128,
+              display: "6.7 inch, LTPO AMOLED, 120Hz",
+              mainCamera: "50MP (Wide) + 12MP (Ultra-wide) + 48MP (Telephoto)",
+              selfieCamera: "10.8MP",
+              battery: 5000,
+              charging: 30,
+              dimensions: "162.9 x 76.6 x 8.9 mm",
+              weight: 212,
+              features: ["Face Unlock", "Titan M2 security", "Magic Eraser", "Photo Unblur", "Google Assistant"]
+            }
+          },
+          {
+            id: 4,
+            name: "Xiaomi 12T Pro",
+            brand: "Xiaomi",
+            price: 9999000,
+            rating: 4.5,
+            image: "/api/placeholder/300/300",
+            specs: {
+              os: "Android 12, MIUI 13",
+              processor: "Snapdragon 8+ Gen 1",
+              ram: 8,
+              storage: 256,
+              display: "6.67 inch, AMOLED, 120Hz",
+              mainCamera: "200MP (Wide) + 8MP (Ultra-wide) + 2MP (Macro)",
+              selfieCamera: "20MP",
+              battery: 5000,
+              charging: 120,
+              dimensions: "163.1 x 75.9 x 8.6 mm",
+              weight: 205,
+              features: ["Harman Kardon speakers", "Dolby Vision", "Dolby Atmos", "NFC", "IR Blaster"]
+            }
+          },
+          {
+            id: 5,
+            name: "OPPO Find X5 Pro",
+            brand: "OPPO",
+            price: 15999000,
+            rating: 4.5,
+            image: "/api/placeholder/300/300",
+            specs: {
+              os: "Android 12, ColorOS 12.1",
+              processor: "Snapdragon 8 Gen 1",
+              ram: 12,
+              storage: 256,
+              display: "6.7 inch, LTPO2 AMOLED, 120Hz",
+              mainCamera: "50MP (Wide) + 50MP (Ultra-wide) + 13MP (Telephoto)",
+              selfieCamera: "32MP",
+              battery: 5000,
+              charging: 80,
+              dimensions: "163.7 x 73.9 x 8.5 mm",
+              weight: 218,
+              features: ["Hasselblad Camera", "MariSilicon X Imaging NPU", "IP68 water resistance", "Ceramic back", "Wireless charging"]
+            }
+          },
+          {
+            id: 6,
+            name: "Vivo X80 Pro",
+            brand: "Vivo",
+            price: 14999000,
+            rating: 4.4,
+            image: "/api/placeholder/300/300",
+            specs: {
+              os: "Android 12, Funtouch OS 12",
+              processor: "Snapdragon 8 Gen 1",
+              ram: 12,
+              storage: 256,
+              display: "6.78 inch, LTPO3 AMOLED, 120Hz",
+              mainCamera: "50MP (Wide) + 48MP (Ultra-wide) + 12MP (Portrait) + 8MP (Periscope)",
+              selfieCamera: "32MP",
+              battery: 4700,
+              charging: 80,
+              dimensions: "164.6 x 75.3 x 9.1 mm",
+              weight: 219,
+              features: ["ZEISS Optics", "V1+ Imaging Chip", "3D Ultrasonic Fingerprint", "IP68 water resistance", "Wireless charging"]
+            }
+          },
+          {
+            id: 7,
+            name: "Samsung Galaxy A53 5G",
+            brand: "Samsung",
+            price: 5999000,
+            rating: 4.2,
+            image: "/api/placeholder/300/300",
+            specs: {
+              os: "Android 12, One UI 4.1",
+              processor: "Exynos 1280",
+              ram: 8,
+              storage: 128,
+              display: "6.5 inch, Super AMOLED, 120Hz",
+              mainCamera: "64MP (Wide) + 12MP (Ultra-wide) + 5MP (Macro) + 5MP (Depth)",
+              selfieCamera: "32MP",
+              battery: 5000,
+              charging: 25,
+              dimensions: "159.6 x 74.8 x 8.1 mm",
+              weight: 189,
+              features: ["IP67 water resistance", "Stereo speakers", "microSD card slot", "5G connectivity", "Samsung Knox security"]
+            }
+          },
+          {
+            id: 8,
+            name: "Xiaomi Redmi Note 11 Pro",
+            brand: "Xiaomi",
+            price: 3999000,
+            rating: 4.0,
+            image: "/api/placeholder/300/300",
+            specs: {
+              os: "Android 11, MIUI 13",
+              processor: "MediaTek Helio G96",
+              ram: 6,
+              storage: 128,
+              display: "6.67 inch, AMOLED, 120Hz",
+              mainCamera: "108MP (Wide) + 8MP (Ultra-wide) + 2MP (Macro) + 2MP (Depth)",
+              selfieCamera: "16MP",
+              battery: 5000,
+              charging: 67,
+              dimensions: "164.2 x 76.1 x 8.1 mm",
+              weight: 202,
+              features: ["Stereo speakers", "IR Blaster", "microSD card slot", "NFC", "3.5mm headphone jack"]
+            }
+          },
+          {
+            id: 9,
+            name: "iPhone SE (2022)",
+            brand: "Apple",
+            price: 7999000,
+            rating: 4.1,
+            image: "/api/placeholder/300/300",
+            specs: {
+              os: "iOS 15",
+              processor: "Apple A15 Bionic",
+              ram: 4,
+              storage: 64,
+              display: "4.7 inch, Retina IPS LCD, 60Hz",
+              mainCamera: "12MP (Wide)",
+              selfieCamera: "7MP",
+              battery: 2018,
+              charging: 20,
+              dimensions: "138.4 x 67.3 x 7.3 mm",
+              weight: 144,
+              features: ["Touch ID", "IP67 water resistance", "Wireless charging", "MagSafe compatible", "5G connectivity"]
+            }
+          },
+          {
+            id: 10,
+            name: "Google Pixel 6a",
+            brand: "Google",
+            price: 6999000,
+            rating: 4.3,
+            image: "/api/placeholder/300/300",
+            specs: {
+              os: "Android 12",
+              processor: "Google Tensor",
+              ram: 6,
+              storage: 128,
+              display: "6.1 inch, OLED, 60Hz",
+              mainCamera: "12.2MP (Wide) + 12MP (Ultra-wide)",
+              selfieCamera: "8MP",
+              battery: 4410,
+              charging: 18,
+              dimensions: "152.2 x 71.8 x 8.9 mm",
+              weight: 178,
+              features: ["Titan M2 security", "In-display fingerprint sensor", "IP67 water resistance", "Google Assistant", "5G connectivity"]
+            }
+          },
+          {
+            id: 11,
+            name: "OPPO Reno 8 Pro",
+            brand: "OPPO",
+            price: 8499000,
+            rating: 4.2,
+            image: "/api/placeholder/300/300",
+            specs: {
+              os: "Android 12, ColorOS 12.1",
+              processor: "MediaTek Dimensity 8100",
+              ram: 12,
+              storage: 256,
+              display: "6.7 inch, AMOLED, 120Hz",
+              mainCamera: "50MP (Wide) + 8MP (Ultra-wide) + 2MP (Macro)",
+              selfieCamera: "32MP",
+              battery: 4500,
+              charging: 80,
+              dimensions: "161.2 x 74.2 x 7.3 mm",
+              weight: 183,
+              features: ["MariSilicon X Imaging NPU", "In-display fingerprint sensor", "Stereo speakers", "NFC", "5G connectivity"]
+            }
+          },
+          {
+            id: 12,
+            name: "Vivo V25 Pro",
+            brand: "Vivo",
+            price: 7499000,
+            rating: 4.0,
+            image: "/api/placeholder/300/300",
+            specs: {
+              os: "Android 12, Funtouch OS 12",
+              processor: "MediaTek Dimensity 1300",
+              ram: 8,
+              storage: 128,
+              display: "6.56 inch, AMOLED, 120Hz",
+              mainCamera: "64MP (Wide) + 8MP (Ultra-wide) + 2MP (Macro)",
+              selfieCamera: "32MP",
+              battery: 4830,
+              charging: 66,
+              dimensions: "158.9 x 73.5 x 8.6 mm",
+              weight: 190,
+              features: ["Color changing back panel", "In-display fingerprint sensor", "OIS camera", "Extended RAM", "5G connectivity"]
+            }
+          }
+        ],
+        
+        // Computed properties
+        get activeFilters() {
+          return {
+            brand: this.filters.brand,
+            price: this.filters.price,
+            ram: this.filters.ram
+          };
+        },
+        
+        get hasActiveFilters() {
+          return Object.values(this.filters).some(filter => filter !== '');
+        },
+        
+        get filteredPhones() {
+          return this.phones.filter(phone => {
+            // Search query filter
+            if (this.searchQuery && !phone.name.toLowerCase().includes(this.searchQuery.toLowerCase()) && 
+                !phone.brand.toLowerCase().includes(this.searchQuery.toLowerCase())) {
+              return false;
+            }
+            
+            // Brand filter
+            if (this.filters.brand && phone.brand !== this.filters.brand) {
+              return false;
+            }
+            
+            // Price filter
+            if (this.filters.price) {
+              if (this.filters.price === 'budget' && phone.price >= 3000000) return false;
+              if (this.filters.price === 'midrange' && (phone.price < 3000000 || phone.price >= 7000000)) return false;
+              if (this.filters.price === 'premium' && (phone.price < 7000000 || phone.price >= 12000000)) return false;
+              if (this.filters.price === 'flagship' && phone.price < 12000000) return false;
+            }
+            
+            // RAM filter
+            if (this.filters.ram) {
+              const ramValue = parseInt(this.filters.ram);
+              if (this.filters.ram === '12' && phone.specs.ram < 12) return false;
+              else if (phone.specs.ram !== ramValue) return false;
+            }
+            
+            return true;
+          });
+        },
+        
+        // Methods
+        formatPrice(price) {
+          return 'Rp ' + price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        },
+        
+        formatFilterLabel(key, value) {
+          if (key === 'brand') return value;
+          if (key === 'price') {
+            if (value === 'budget') return '< Rp 3 Juta';
+            if (value === 'midrange') return 'Rp 3 - 7 Juta';
+            if (value === 'premium') return 'Rp 7 - 12 Juta';
+            if (value === 'flagship') return '> Rp 12 Juta';
+          }
+          if (key === 'ram') return `RAM ${value}GB`;
+          return value;
+        },
+        
+        clearFilter(key) {
+          this.filters[key] = '';
+        },
+        
+        clearAllFilters() {
+          this.filters.brand = '';
+          this.filters.price = '';
+          this.filters.ram = '';
+          this.searchQuery = '';
+        },
+        
+        togglePhoneSelection(phoneId) {
+          const index = this.selectedPhones.indexOf(phoneId);
+          if (index === -1) {
+            if (this.selectedPhones.length < 4) {
+              this.selectedPhones.push(phoneId);
+            } else {
+              alert('Maksimal 4 perangkat yang dapat dibandingkan secara bersamaan');
+            }
+          } else {
+            this.selectedPhones.splice(index, 1);
+          }
+        },
+        
+        isPhoneSelected(phoneId) {
+          return this.selectedPhones.includes(phoneId);
+        },
+        
+        removePhoneFromComparison(phoneId) {
+          const index = this.selectedPhones.indexOf(phoneId);
+          if (index !== -1) {
+            this.selectedPhones.splice(index, 1);
+          }
+        },
+        
+        getBestInCategory(phoneIds, category) {
+          let bestPhoneId = null;
+          let bestValue = null;
+          
+          for (const phoneId of phoneIds) {
+            const phone = this.phones.find(p => p.id === phoneId);
+            
+            if (!phone) continue;
+            
+            let value;
+            switch (category) {
+              case 'ram':
+              case 'storage':
+              case 'battery':
+              case 'charging':
+                value = phone.specs[category];
+                break;
+              case 'processor':
+                // Simplified processor comparison (just a placeholder)
+                value = phone.specs.processor.includes('A16') ? 10 :
+                       phone.specs.processor.includes('8 Gen 1') ? 9 :
+                       phone.specs.processor.includes('Tensor') ? 8 :
+                       phone.specs.processor.includes('Dimensity') ? 7 :
+                       phone.specs.processor.includes('Helio') ? 6 :
+                       phone.specs.processor.includes('Exynos') ? 5 : 0;
+                break;
+              case 'mainCamera':
+                // Simple comparison based on primary camera MP
+                value = parseInt(phone.specs.mainCamera.match(/\d+/)[0]);
+                break;
+              case 'selfieCamera':
+                // Simple comparison based on selfie camera MP
+                value = parseInt(phone.specs.selfieCamera.match(/\d+/)[0]);
+                break;
+              case 'display':
+                // Simple comparison giving priority to higher refresh rate
+                value = phone.specs.display.includes('120Hz') ? 3 :
+                       phone.specs.display.includes('90Hz') ? 2 :
+                       phone.specs.display.includes('60Hz') ? 1 : 0;
+                break;
+              case 'os':
+                // Give some arbitrary value to compare OS
+                value = phone.specs.os.includes('iOS') ? 2 :
+                       phone.specs.os.includes('Android 13') ? 4 :
+                       phone.specs.os.includes('Android 12') ? 3 :
+                       phone.specs.os.includes('Android 11') ? 2 : 1;
+                break;
+              default:
+                value = 0;
+            }
+            
+            if (bestValue === null || value > bestValue) {
+              bestValue = value;
+              bestPhoneId = phone.id;
+            }
+          }
+          
+          return bestPhoneId;
+        }
+      };
+    }
+  </script>
+</body>
+</html>
