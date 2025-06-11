@@ -1,42 +1,30 @@
-# Singgak.com
+# 🚗🏠 Singgak.com
 
-Aplikasi penyewaaan kendaraan dan rumah
+**Singgak.com** adalah aplikasi web yang menjadi penghubung antara penyedia jasa penyewaan—baik kendaraan maupun rumah—dengan calon penyewa. Aplikasi ini dirancang untuk mempermudah proses penawaran dan pemesanan layanan sewa secara online, cepat, dan efisien.
 
-SINGGAK adalah sebuah platform web interaktif yang memudahkan pengguna khususnya wisatawan dalam mencari, mendapatkan, dan menyewa baik itu rumah maupun kendaraan dalam lingkup lokal. Website ini bertujuan untuk membantu menghubungkan atau memudahkan komunikasi antara penyedia jasa dan calon penyewa jasa yang ingin menggunakan jasa seperti penyewaan kendaraan dan rumah.
+## 🔍 Deskripsi
 
-1.NavBar
-  - Logo
-  - Menu Utama
-    - Home
-    - perbandingan
-    - Artikel
-    - Tentang Kami
+Singgak.com hadir sebagai solusi digital dalam dunia penyewaan, memungkinkan pengguna untuk menemukan jasa sewa yang mereka butuhkan dan menghubungkan mereka langsung dengan penyedia layanan. Sistem ini mendukung fitur pencarian, pemesanan, dan pengelolaan layanan sewa secara terpusat.
 
-2. Pencarian & Filter
-  - Nama Smartphone
-  - Merek
-  - Harga
-  - RAM
+Website ini menyediakan dashboard dengan fitur berbeda untuk tiap jenis pengguna:
+- **Vendor**: Kelola listing jasa sewa, atur ketersediaan, pantau pemesanan.
+- **Penyewa**: Cari jasa sewa, lakukan pemesanan, dan beri ulasan.
+- **Admin**: Pantau aktivitas pengguna, verifikasi listing, kelola sistem.
 
-3. Daftar Smartphone
-  - Gambar Smartphone
-  - Nama Produk
-  - Rating Smartphone
-  - Merek Pembuat
-  - Harga
-  - Tombol Detail
-  - Tombol Tambah Perbandingan
+## 🚀 Fitur Utama
 
-4. Perbandingan
-  - Spesifikasi Teknis
-  - Perbandigan Harga
-  - Kelebihan dan Kekurangan
-  - Rekomendasi Pembelian
+### Admin
+- 🔎 Pencarian jasa sewa berdasarkan lokasi dan kategori
+- 📦 Manajemen daftar sewa untuk penyedia
+- 📝 Sistem pemesanan dan notifikasi
+- 💬 Ulasan dan rating penyewa
+- 🔐 Autentikasi pengguna & manajemen role (Admin, Penyewa, Penyedia)
+- 📊 Dashboard interaktif untuk masing-masing peran
 
-5. Teknologi Digunakan
-  - Frontend : HTML, Tailwind CSS
+## 🛠️ Teknologi yang Digunakan
 
-FITUR UTAMA
-  - Pencarian Smartphone
-  - Perbandingan Spesifikasi antar Smartphone
-  - Rating & Ulasan
+- **Frontend**: HTML, CSS, JavaScript
+- **Backend**: PHP / Laravel / CodeIgniter (sesuaikan)
+- **Database**: MySQL
+- **Framework CSS**: Bootstrap / Tailwind (jika ada)
+- **Lainnya**: (tambahkan jika ada seperti Firebase, API, dll)
