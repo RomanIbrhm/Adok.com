@@ -1,8 +1,8 @@
-# Adok.com
+# Singgak.com
 
-Aplikasi komparasi handphone berbasis website
+Aplikasi penyewaaan kendaraan dan rumah
 
-ADOK adalah sebuah platform web interaktif yang memudahkan pengguna dalam mencari, membandingkan, dan menganalisis berbagai jenis smartphone berdasarkan spesifikasi, harga, merek, dan performa. Website ini bertujuan untuk membantu pengguna membuat keputusan pembelian yang lebih bijak dan tepat.
+SINGGAK adalah sebuah platform web interaktif yang memudahkan pengguna khususnya wisatawan dalam mencari, mendapatkan, dan menyewa baik itu rumah maupun kendaraan dalam lingkup lokal. Website ini bertujuan untuk membantu menghubungkan atau memudahkan komunikasi antara penyedia jasa dan calon penyewa jasa yang ingin menggunakan jasa seperti penyewaan kendaraan dan rumah.
 
 1.NavBar
   - Logo
