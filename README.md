@@ -1,30 +1,27 @@
 # 🚗🏠 Singgak.com
 
-**Singgak.com** adalah aplikasi web yang menjadi penghubung antara penyedia jasa penyewaan—baik kendaraan maupun rumah—dengan calon penyewa. Aplikasi ini dirancang untuk mempermudah proses penawaran dan pemesanan layanan sewa secara online, cepat, dan efisien.
+**Singgak.com** adalah aplikasi web yang menjadi penghubung antara calon penyewa dengan penyedia jasa sewa—baik kendaraan maupun rumah—melalui sistem terpusat yang dikelola oleh admin. Aplikasi ini bertujuan mempermudah proses pencarian, penawaran, dan pemesanan layanan sewa secara online, cepat, dan aman.
 
 ## 🔍 Deskripsi
 
-Singgak.com hadir sebagai solusi digital dalam dunia penyewaan, memungkinkan pengguna untuk menemukan jasa sewa yang mereka butuhkan dan menghubungkan mereka langsung dengan penyedia layanan. Sistem ini mendukung fitur pencarian, pemesanan, dan pengelolaan layanan sewa secara terpusat.
+Singgak.com hadir sebagai solusi digital dalam dunia penyewaan, memungkinkan pengguna untuk menemukan jasa sewa yang mereka butuhkan dan melakukan pemesanan dengan mudah. Seluruh data penyedia jasa dikelola langsung oleh **admin**, sehingga informasi yang ditampilkan lebih terverifikasi dan terpercaya.
 
-Website ini menyediakan dashboard dengan fitur berbeda untuk tiap jenis pengguna:
-- **Vendor**: Kelola listing jasa sewa, atur ketersediaan, pantau pemesanan.
-- **Penyewa**: Cari jasa sewa, lakukan pemesanan, dan beri ulasan.
-- **Admin**: Pantau aktivitas pengguna, verifikasi listing, kelola sistem.
+Website ini menyediakan dashboard dengan fitur berbeda untuk dua jenis pengguna:
+- **Penyewa**: Mencari jasa sewa, melakukan pemesanan, dan memberikan ulasan.
+- **Admin**: Mengelola data penyedia jasa, menambahkan atau memperbarui informasi sewa, memverifikasi pemesanan, dan memantau aktivitas sistem.
 
 ## 🚀 Fitur Utama
 
-### Admin
-- 🔎 Pencarian jasa sewa berdasarkan lokasi dan kategori
-- 📦 Manajemen daftar sewa untuk penyedia
-- 📝 Sistem pemesanan dan notifikasi
-- 💬 Ulasan dan rating penyewa
-- 🔐 Autentikasi pengguna & manajemen role (Admin, Penyewa, Penyedia)
-- 📊 Dashboard interaktif untuk masing-masing peran
+- 🔎 Pencarian jasa sewa berdasarkan kategori dan lokasi
+- 📋 Daftar layanan sewa kendaraan dan rumah
+- 📝 Pemesanan jasa sewa secara online
+- 💬 Sistem ulasan dan rating dari penyewa
+- 👥 Login dan manajemen akun
+- 🛠️ Dashboard admin untuk mengelola data layanan dan pengguna
 
 ## 🛠️ Teknologi yang Digunakan
 
 - **Frontend**: HTML, CSS, JavaScript
-- **Backend**: PHP / Laravel / CodeIgniter (sesuaikan)
+- **Styling Framework**: Bootstrap
+- **Backend**: PHP (native, tanpa framework)
 - **Database**: MySQL
-- **Framework CSS**: Bootstrap / Tailwind (jika ada)
-- **Lainnya**: (tambahkan jika ada seperti Firebase, API, dll)
