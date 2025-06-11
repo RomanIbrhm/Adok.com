@@ -1,7 +1,7 @@
 <div class="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark" style="width: 280px; min-height: 100vh;">
     <a href="admin_dashboard.php" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-        <i class="fas fa-car-side me-2 fs-4"></i>
-        <span class="fs-4">Singgak Admin</span>
+        <i class="fas fa-car-side me-2 fs-4 text-primary"></i>
+        <span class="fs-4 text-white">Singgak Admin</span>
     </a>
     <hr>
     <ul class="nav nav-pills flex-column mb-auto">

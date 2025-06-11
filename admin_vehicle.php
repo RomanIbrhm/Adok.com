@@ -28,6 +28,9 @@ $current_page = 'vehicles'; // Untuk menandai menu aktif di sidebar
         .table-responsive {
             min-height: 500px; /* Memberi ruang agar tidak terasa sempit */
         }
+        :root{
+            --bs-primary-rgb : 245,183,84;
+        }
     </style>
 </head>
 <body>

@@ -11,6 +11,6 @@ $_SESSION = array();
 session_destroy();
 
 // Arahkan kembali ke halaman login
-header("location: login.html");
+header("location: login.php");
 exit;
 ?>

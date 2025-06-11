@@ -1,18 +1,44 @@
 <?php
-// index.php
+// index.php (Perbaikan Final Link Login)
 session_start();
 require_once "config.php";
 
-// --- Ambil data mobil yang tersedia (misalnya, 3 mobil acak) ---
-$sql_cars = "SELECT id, brand, model, seater, transmission, fuel_type, price_per_day, image_url 
-             FROM cars 
-             WHERE status = 'available' 
-             ORDER BY RAND() 
-             LIMIT 3";
-$result_cars = $conn->query($sql_cars);
+// --- Ambil 4 gambar mobil acak untuk slideshow ---
+$slideshow_images = [];
+$sql_slideshow = "SELECT image_url FROM cars WHERE status = 'available' AND image_url IS NOT NULL ORDER BY RAND() LIMIT 4";
+$result_slideshow = $conn->query($sql_slideshow);
 
-// --- Tentukan URL tujuan untuk tombol utama ---
-$main_rent_now_url = "login.html"; // Default jika belum login
+if ($result_slideshow && $result_slideshow->num_rows > 0) {
+    while($row = $result_slideshow->fetch_assoc()) {
+        $slideshow_images[] = $row['image_url'];
+    }
+} else {
+    // Gambar fallback
+    $slideshow_images[] = 'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?q=80&w=2100&auto=format&fit=crop';
+}
+
+
+// --- Ambil data mobil yang tersedia (3 mobil acak untuk tampilan awal) ---
+$sql_initial_cars = "SELECT id, brand, model, seater, transmission, fuel_type, price_per_day, image_url 
+                     FROM cars 
+                     WHERE status = 'available' 
+                     ORDER BY RAND() 
+                     LIMIT 3";
+$result_initial_cars = $conn->query($sql_initial_cars);
+
+
+// --- DAPATKAN SEMUA MEREK UNIK UNTUK FILTER ---
+$brands = [];
+$sql_brands = "SELECT DISTINCT brand FROM cars WHERE status = 'available' ORDER BY brand ASC";
+$result_brands = $conn->query($sql_brands);
+if ($result_brands->num_rows > 0) {
+    while($row = $result_brands->fetch_assoc()) {
+        $brands[] = $row['brand'];
+    }
+}
+
+// --- PERBAIKAN DI SINI ---
+$main_rent_now_url = "login.php"; // Default jika belum login
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
     // Jika sudah login, arahkan ke halaman booking
     $main_rent_now_url = "book_page.php"; 
@@ -24,13 +50,9 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Singgak - Premium Car Rental</title>
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
     <style>
         :root {
             --bs-primary-rgb: 245, 183, 84;
@@ -38,10 +60,25 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
         }
         html { scroll-padding-top: 80px; scroll-behavior: smooth; }
         body { font-family: 'Poppins', sans-serif; padding-top: 80px; background-color: #f8f9fa; }
-        .navbar { transition: background-color 0.4s ease-out, padding 0.4s ease-out; padding: 1.5rem 0; }
-        .navbar.scrolled { background-color: rgba(10, 10, 10, 0.9); backdrop-filter: blur(5px); padding: 0.75rem 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .hero-section { background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?q=80&w=2100&auto=format&fit=crop'); background-size: cover; background-position: center; margin-top: -80px; min-height: 100vh; }
-        .hero-section .display-3 { font-weight: 800; text-shadow: 2px 2px 8px rgba(0,0,0,0.5); }
+        .navbar {
+            background-color: transparent;
+            transition: background-color 0.4s ease-out, padding 0.4s ease-out;
+            padding: 1.5rem 0;
+        }
+        .navbar.scrolled {
+            background-color: rgba(10, 10, 10, 0.9);
+            backdrop-filter: blur(5px);
+            padding: 0.75rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        #heroCarousel { height: 100vh; margin-top: -80px; }
+        .carousel-inner, .carousel-item { height: 100%; }
+        .carousel-item img { height: 100%; object-fit: cover; width: 100%; }
+        .carousel-item::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); }
+        .hero-caption { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; color: white; text-align: center; width: 90%; }
+        .hero-caption .display-3 { font-weight: 800; text-shadow: 2px 2px 8px rgba(0,0,0,0.5); }
+
         .btn-primary { background-color: #f5b754; border-color: #f5b754; color: #161616; padding: 12px 35px; font-weight: 600; }
         .btn-primary:hover { background-color: #e4a94a; border-color: #e4a94a; }
         .section-title { font-weight: 700; }
@@ -51,6 +88,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
         footer { background-color: #161616; }
         footer a { text-decoration: none; color: #adb5bd; transition: color 0.3s ease; }
         footer a:hover { color: #f5b754; }
+        footer .text-muted { color: #adb5bd !important;}
     </style>
 </head>
 <body>
@@ -58,7 +96,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container">
             <a class="navbar-brand fs-3 fw-bold" href="index.php">
-                <i class="fas fa-car-side text-primary me-2"></i>singgak
+                <i class="fas fa-car-side text-primary me-2"></i><span class="text-white">singgak</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -74,19 +112,45 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
                         <a class="btn btn-outline-light btn-sm me-2" href="dashboard.php">Dashboard</a>
                         <a class="btn btn-primary btn-sm" href="logout.php">Logout</a>
                     <?php else: ?>
-                        <a class="btn btn-outline-primary btn-sm" href="login.html">Sign In</a>
+                        <a class="btn btn-outline-primary btn-sm" href="login.php">Sign In</a>
                     <?php endif; ?>
                 </div>
             </div>
         </div>
     </nav>
 
-    <header id="home" class="hero-section text-white d-flex flex-column justify-content-center">
-        <div class="container text-center">
-            <h1 class="display-3">Find Your Perfect Ride</h1>
-            <p class="lead col-lg-8 mx-auto my-4">Rent the car of your dreams. Unbeatable prices, unlimited miles, flexible pick-up options and much more.</p>
-            <a href="<?php echo $main_rent_now_url; ?>" class="btn btn-primary rounded-pill">Rent Now</a>
+    <header id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="2000">
+        
+        <div class="carousel-indicators">
+            <?php foreach ($slideshow_images as $i => $image): ?>
+                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="<?php echo $i; ?>" class="<?php echo ($i == 0) ? 'active' : ''; ?>" aria-current="true" aria-label="Slide <?php echo $i + 1; ?>"></button>
+            <?php endforeach; ?>
         </div>
+
+        <div class="carousel-inner">
+            <?php foreach ($slideshow_images as $i => $image): ?>
+                <div class="carousel-item <?php echo ($i == 0) ? 'active' : ''; ?>">
+                    <img src="<?php echo htmlspecialchars($image); ?>" class="d-block w-100" alt="Car Slideshow Image">
+                </div>
+            <?php endforeach; ?>
+        </div>
+
+        <div class="hero-caption">
+            <div class="container">
+                <h1 class="display-3">Find Your Perfect Ride</h1>
+                <p class="lead col-lg-8 mx-auto my-4">Rent the car of your dreams. Unbeatable prices, unlimited miles, flexible pick-up options and much more.</p>
+                <a href="<?php echo $main_rent_now_url; ?>" class="btn btn-primary rounded-pill">Rent Now</a>
+            </div>
+        </div>
+        
+        <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
     </header>
 
     <section id="best-cars" class="py-5 bg-white">
@@ -95,9 +159,26 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
                 <p class="section-subtitle">Our Fleet</p>
                 <h2 class="section-title">Best Rental Cars Available</h2>
             </div>
-            <div class="row">
-                <?php if ($result_cars && $result_cars->num_rows > 0): ?>
-                    <?php while($car = $result_cars->fetch_assoc()): ?>
+
+            <div class="row justify-content-center mb-5">
+                <div class="col-lg-6">
+                    <div class="input-group">
+                        <label class="input-group-text" for="brandFilter">Search by Brand:</label>
+                        <select id="brandFilter" class="form-select">
+                            <option value="all" selected>All Brands (Default)</option>
+                            <?php foreach ($brands as $brand_item): ?>
+                                <option value="<?php echo htmlspecialchars($brand_item); ?>">
+                                    <?php echo htmlspecialchars($brand_item); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="carListContainer" class="row">
+                <?php if ($result_initial_cars && $result_initial_cars->num_rows > 0): ?>
+                    <?php while($car = $result_initial_cars->fetch_assoc()): ?>
                     <div class="col-lg-4 col-md-6 mb-4">
                         <div class="card car-card rounded-4 h-100 border-0 shadow-sm">
                             <img src="<?php echo htmlspecialchars($car['image_url']); ?>" class="card-img-top p-3" alt="<?php echo htmlspecialchars($car['brand'] . ' ' . $car['model']); ?>" style="height: 200px; object-fit: cover;">
@@ -159,13 +240,13 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
         <div class="container text-center text-md-start">
             <div class="row">
                 <div class="col-md-6 col-lg-6 col-xl-6 mx-auto mb-4">
-                    <h5 class="fw-bold mb-4"><i class="fas fa-car-side text-primary me-2"></i>singgak</h5>
+                    <h5 class="fw-bold mb-4"><i class="fas fa-car-side text-primary me-2"></i><span class="text-white">singgak</span></h5>
                     <p class="text-muted">We offer a big range of vehicles for all your driving needs. We have the perfect car to meet your needs.</p>
                 </div>
                 <div class="col-md-3 col-lg-2 col-xl-2 mx-auto mb-4">
                     <h5 class="fw-bold mb-4">Support</h5>
                     <p><a href="<?php echo $main_rent_now_url; ?>">Booking</a></p>
-                    <p><a href="login.html">Sign In / Sign Up</a></p>
+                    <p><a href="login.php">Sign In / Sign Up</a></p>
                 </div>
                 <div class="col-md-3 col-lg-3 col-xl-3 mx-auto mb-md-0 mb-4">
                     <h5 class="fw-bold mb-4">Contact</h5>
@@ -189,10 +270,23 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
                 nav.classList.remove('scrolled');
             }
         });
+
+        document.getElementById('brandFilter').addEventListener('change', function() {
+            const selectedBrand = this.value;
+            const carListContainer = document.getElementById('carListContainer');
+            
+            carListContainer.innerHTML = '<div class="col-12 text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+            
+            fetch(`ajax_search_cars.php?brand=${selectedBrand}&source=index`)
+                .then(response => response.text())
+                .then(html => {
+                    carListContainer.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Error fetching car data:', error);
+                    carListContainer.innerHTML = '<div class="col-12 text-center"><p class="text-danger">Failed to load car data. Please try again.</p></div>';
+                });
+        });
     </script>
 </body>
 </html>
-<?php
-// Tutup koneksi setelah selesai
-if(isset($conn)) $conn->close();
-?>

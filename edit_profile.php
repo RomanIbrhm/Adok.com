@@ -20,6 +20,8 @@ $user = $result->fetch_assoc();
 $stmt->close();
 
 $conn->close();
+
+$current_page = basename($_SERVER['PHP_SELF']); // Get current page filename
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -36,21 +38,26 @@ $conn->close();
 
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container">
-            <a class="navbar-brand fs-3 fw-bold" href="dashboard.php">
-                <i class="fas fa-car-side text-primary me-2"></i>singgak
+            <a class="navbar-brand fs-3 fw-bold text-white" href="dashboard.php">
+                <i class="fas fa-car-side me-2" style="color: rgb(245, 183, 84);"></i>singgak
             </a>
-            <div class="collapse navbar-collapse">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav mx-auto">
-                    <li class="nav-item"><a class="nav-link" href="dashboard.php">Home</a></li>
+                    <li class="nav-item"><a class="nav-link <?php echo ($current_page == 'dashboard.php') ? 'active' : ''; ?>" href="dashboard.php">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="dashboard.php#my-bookings">My Bookings</a></li>
-                    <li class="nav-item"><a class="nav-link" href="book_page.php">Book Now</a></li>
+                    <li class="nav-item"><a class="nav-link <?php echo ($current_page == 'book_page.php') ? 'active' : ''; ?>" href="book_page.php">Book Now</a></li>
                 </ul>
                 <div class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
+                    <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fas fa-user-circle me-1"></i> Hi, <?php echo htmlspecialchars($_SESSION['user_name']); ?>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
-                        <li><a class="dropdown-item active" href="edit_profile.php">Edit Profile</a></li>
+                        <li><h6 class="dropdown-header">Hi, <?php echo htmlspecialchars($_SESSION['user_name']); ?></h6></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item <?php echo ($current_page == 'edit_profile.php') ? 'active' : ''; ?>" href="edit_profile.php">Edit Profile</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="logout.php">Logout</a></li>
                     </ul>

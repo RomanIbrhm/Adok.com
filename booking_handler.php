@@ -1,55 +1,73 @@
 <?php
-// booking_handler.php
+// RENTAL/booking_handler.php
+
 session_start();
 
+// Pastikan pengguna sudah login dan metode request adalah POST
 if (!isset($_SESSION['loggedin']) || $_SERVER["REQUEST_METHOD"] != "POST") {
-    header("location: login.html");
+    header("location: login.php");
     exit;
 }
 
 require_once "config.php";
 
-// Ambil data dari form
+// --- PENGAMBILAN DATA DARI FORM ---
 $user_id = (int)$_POST['user_id'];
 $car_id = (int)$_POST['car_id'];
 $start_date_str = $_POST['start_date'];
 $end_date_str = $_POST['end_date'];
 
-// (Validasi dan kalkulasi harga tetap sama)
+// --- VALIDASI DAN KALKULASI HARGA (Logika ini tetap sama) ---
+// Validasi tanggal dasar
+if (empty($start_date_str) || empty($end_date_str)) {
+    die("Error: Tanggal mulai dan tanggal selesai wajib diisi.");
+}
+
 $start_date = new DateTime($start_date_str);
 $end_date = new DateTime($end_date_str);
-if ($end_date <= $start_date) die("Error: Tanggal tidak valid.");
+
+// Pastikan tanggal selesai tidak lebih awal dari tanggal mulai
+if ($end_date <= $start_date) {
+    die("Error: Tanggal selesai harus setelah tanggal mulai.");
+}
+
+// Hitung durasi sewa
 $interval = $end_date->diff($start_date);
-$rental_days = $interval->days > 0 ? $interval->days : 1;
+$rental_days = $interval->days > 0 ? $interval->days : 1; // Minimal sewa 1 hari
+
+// Ambil harga mobil dari database untuk kalkulasi
 $stmt_price = $conn->prepare("SELECT price_per_day FROM cars WHERE id = ?");
 $stmt_price->bind_param("i", $car_id);
 $stmt_price->execute();
-$car_price_per_day = $stmt_price->get_result()->fetch_assoc()['price_per_day'];
+$result_price = $stmt_price->get_result();
+if ($result_price->num_rows === 0) {
+    die("Error: Mobil tidak ditemukan.");
+}
+$car_price_per_day = $result_price->fetch_assoc()['price_per_day'];
 $stmt_price->close();
+
+// Kalkulasi total biaya
 $rental_fee = $rental_days * $car_price_per_day;
-$insurance_fee = 150;
-$taxes_fee = $rental_fee * 0.10;
+$insurance_fee = 150; // Biaya asuransi tetap
+$taxes_fee = $rental_fee * 0.10; // Pajak 10%
 $total_price = $rental_fee + $insurance_fee + $taxes_fee;
 
-// --- PERUBAHAN UTAMA DI SINI ---
+// --- PERUBAHAN UTAMA: SIMPAN DETAIL BOOKING KE SESSION ---
+// Alih-alih menyimpan ke database, kita simpan semua informasi ke dalam session.
+// Ini mencegah pembuatan booking "hantu" jika pengguna batal membayar.
+$_SESSION['pending_booking'] = [
+    'user_id' => $user_id,
+    'car_id' => $car_id,
+    'start_date' => $start_date_str,
+    'end_date' => $end_date_str,
+    'total_price' => $total_price
+];
 
-// 1. Simpan booking ke database dengan status 'awaiting_payment'
-$sql_booking = "INSERT INTO bookings (user_id, car_id, start_date, end_date, total_price, booking_status) VALUES (?, ?, ?, ?, ?, 'awaiting_payment')";
-$stmt_booking = $conn->prepare($sql_booking);
-$stmt_booking->bind_param("iissd", $user_id, $car_id, $start_date_str, $end_date_str, $total_price);
-
-if ($stmt_booking->execute()) {
-    $last_booking_id = $stmt_booking->insert_id;
-    $_SESSION['processing_booking_id'] = $last_booking_id;
-    
-    // Alihkan pengguna ke halaman pembayaran
-    header("Location: payment.php");
-    exit();
-
-} else {
-    echo "Error: Tidak dapat memproses pesanan Anda. " . $stmt_booking->error;
-}
-
-$stmt_booking->close();
+// Tutup koneksi database karena kita tidak menggunakannya untuk INSERT di sini
 $conn->close();
+
+// Arahkan pengguna ke halaman pembayaran
+header("Location: payment.php");
+exit();
+
 ?>

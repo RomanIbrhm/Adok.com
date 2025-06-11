@@ -11,19 +11,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // 2. Validasi
     if (empty($full_name) || empty($email) || empty($password) || empty($password_confirm)) {
-        header("Location: signup_page.html?error=emptyfields");
+        header("Location: signup_page.php?error=emptyfields");
         exit();
     }
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        header("Location: signup_page.html?error=invalidemail");
+        header("Location: signup_page.php?error=invalidemail");
         exit();
     }
     if ($password !== $password_confirm) {
-        header("Location: signup_page.html?error=passwordcheck");
+        header("Location: signup_page.php?error=passwordcheck");
         exit();
     }
     if (strlen($password) < 8) {
-        header("Location: signup_page.html?error=passwordshort");
+        header("Location: signup_page.php?error=passwordshort");
         exit();
     }
 
@@ -35,7 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt_check->store_result();
 
     if ($stmt_check->num_rows > 0) {
-        header("Location: signup_page.html?error=emailtaken");
+        header("Location: signup_page.php?error=emailtaken");
         $stmt_check->close();
         exit();
     }
@@ -50,15 +50,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt_insert->bind_param("sss", $full_name, $email, $password_hash);
 
     if ($stmt_insert->execute()) {
-        header("Location: login.html?signup=success");
+        header("Location: login.php?signup=success");
         exit();
     } else {
-        header("Location: signup_page.html?error=sqlerror");
+        header("Location: signup_page.php?error=sqlerror");
         exit();
     }
 
 } else {
-    header("Location: signup_page.html");
+    header("Location: signup_page.php");
     exit();
 }
 ?>

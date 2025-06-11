@@ -8,7 +8,7 @@ session_start();
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     // Simpan halaman tujuan agar bisa kembali setelah login
     $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
-    header('location: login.html?error=loginrequired');
+    header('location: login.php?error=loginrequired');
     exit;
 }
 
@@ -51,6 +51,7 @@ if ($car === null && count($all_cars) > 0) {
     die("Mohon maaf, tidak ada mobil yang tersedia saat ini.");
 }
 
+$current_page = basename($_SERVER['PHP_SELF']); // Get current page filename
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -64,8 +65,7 @@ if ($car === null && count($all_cars) > 0) {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <style>
+    <link rel="stylesheet" href="style.css"> <style>
         :root {
             --bs-primary-rgb: 245, 183, 84;
             --bs-dark-rgb: 22, 22, 22;
@@ -75,12 +75,7 @@ if ($car === null && count($all_cars) > 0) {
             padding-top: 80px;
             background-color: #f8f9fa;
         }
-        .navbar {
-            background-color: rgba(10, 10, 10, 0.9);
-            backdrop-filter: blur(5px);
-            padding: 0.75rem 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
+        /* Removed .navbar inline style here, as it's now in style.css */
         .section-title { font-weight: 700; }
         .summary-card { position: sticky; top: 100px; }
         .btn-primary {
@@ -92,7 +87,7 @@ if ($car === null && count($all_cars) > 0) {
         }
         .btn-primary:hover {
             background-color: #e4a94a;
-            border-color: #e4a94a;
+            border-color: #e4a4a;
         }
         footer { background-color: #161616; }
         footer a { text-decoration: none; color: #adb5bd; transition: color 0.3s ease; }
@@ -106,18 +101,23 @@ if ($car === null && count($all_cars) > 0) {
             <a class="navbar-brand fs-3 fw-bold" href="dashboard.php">
                 <i class="fas fa-car-side text-primary me-2"></i>singgak
             </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav mx-auto">
-                    <li class="nav-item"><a class="nav-link" href="dashboard.php">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="dashboard.php#my-bookings">My Booking</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="book_page.php">Booking</a></li>
+                    <li class="nav-item"><a class="nav-link <?php echo ($current_page == 'dashboard.php') ? 'active' : ''; ?>" href="dashboard.php">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="dashboard.php#my-bookings">My Bookings</a></li>
+                    <li class="nav-item"><a class="nav-link <?php echo ($current_page == 'book_page.php') ? 'active' : ''; ?>" href="book_page.php">Book Now</a></li>
                 </ul>
                 <div class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-user-circle me-1"></i> Profil
+                    <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user-circle me-1"></i> Hi, <?php echo htmlspecialchars($_SESSION['user_name']); ?>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
                         <li><h6 class="dropdown-header">Hi, <?php echo htmlspecialchars($_SESSION['user_name']); ?></h6></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="edit_profile.php">Edit Profile</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="logout.php">Logout</a></li>
                     </ul>
@@ -137,7 +137,7 @@ if ($car === null && count($all_cars) > 0) {
                 <div class="card border-0 shadow-sm p-4 rounded-4">
                     <div class="card-body">
                         <form action="booking_handler.php" method="POST" id="bookingForm">
-                            
+
                             <input type="hidden" name="user_id" value="<?php echo $_SESSION['user_id']; ?>">
                             <input type="hidden" name="car_id" value="<?php echo $car['id']; ?>">
 
@@ -186,7 +186,7 @@ if ($car === null && count($all_cars) > 0) {
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex justify-content-between align-items-center px-0">
                                 Rental Fee (<span id="rentalDays">0 days</span>)
-                                <span id="rentalFee">$0</span>
+                                <span id= "rentalFee">$0</span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center px-0">
                                 Insurance
@@ -249,8 +249,7 @@ if ($car === null && count($all_cars) > 0) {
             const rentalFee = rentalDays * pricePerDay;
             const insuranceFee = 150; // Biaya asuransi tetap
             const taxesFee = rentalFee * 0.10; // Pajak 10% dari biaya sewa
-            const totalPrice = rentalFee + insuranceFee + taxesFee;
-
+            const totalPrice = rentalFee + insuranceFee + taxesFee;     
             // Update UI
             document.getElementById('rentalDays').innerText = `${rentalDays} days`;
             document.getElementById('rentalFee').innerText = `$${rentalFee.toFixed(2)}`;
@@ -264,6 +263,7 @@ if ($car === null && count($all_cars) > 0) {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('pickupDate').setAttribute('min', today);
             document.getElementById('dropoffDate').setAttribute('min', today);
+            calculatePrice();
         });
 
     </script>
