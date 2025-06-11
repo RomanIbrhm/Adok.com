@@ -1,42 +1,27 @@
-# Adok.com
+# 🚗 Singgak.com
 
-Aplikasi komparasi handphone berbasis website
+**Singgak.com** adalah aplikasi web yang menjadi penghubung antara calon penyewa dengan penyedia jasa sewa kendaraan, seperti mobil dan motor, melalui sistem yang dikelola oleh admin. Aplikasi ini dirancang untuk mempermudah proses pencarian, pemesanan, dan pengelolaan layanan sewa kendaraan secara online.
 
-ADOK adalah sebuah platform web interaktif yang memudahkan pengguna dalam mencari, membandingkan, dan menganalisis berbagai jenis smartphone berdasarkan spesifikasi, harga, merek, dan performa. Website ini bertujuan untuk membantu pengguna membuat keputusan pembelian yang lebih bijak dan tepat.
+## 🔍 Deskripsi
 
-1.NavBar
-  - Logo
-  - Menu Utama
-    - Home
-    - perbandingan
-    - Artikel
-    - Tentang Kami
+Singgak.com hadir sebagai solusi digital dalam bidang penyewaan kendaraan, memungkinkan pengguna untuk menemukan layanan sewa yang mereka butuhkan dengan mudah. Semua data penyedia dan informasi kendaraan dikelola langsung oleh **admin**, sehingga menjamin informasi yang akurat dan terpercaya.
 
-2. Pencarian & Filter
-  - Nama Smartphone
-  - Merek
-  - Harga
-  - RAM
+Website ini menyediakan dashboard dengan fitur berbeda untuk dua jenis pengguna:
+- **Penyewa**: Dapat melihat daftar kendaraan yang tersedia, melakukan pemesanan, dan memberikan ulasan setelah menyewa.
+- **Admin**: Bertanggung jawab atas pengelolaan data kendaraan, pengelolaan pemesanan, serta pengaturan akun pengguna.
 
-3. Daftar Smartphone
-  - Gambar Smartphone
-  - Nama Produk
-  - Rating Smartphone
-  - Merek Pembuat
-  - Harga
-  - Tombol Detail
-  - Tombol Tambah Perbandingan
+## 🚀 Fitur Utama
 
-4. Perbandingan
-  - Spesifikasi Teknis
-  - Perbandigan Harga
-  - Kelebihan dan Kekurangan
-  - Rekomendasi Pembelian
+- 🔎 Pencarian kendaraan berdasarkan jenis
+- 📋 Daftar kendaraan lengkap dengan deskripsi dan harga sewa
+- 📝 Sistem pemesanan kendaraan secara online
+- 💬 Ulasan dan rating dari penyewa
+- 👥 Sistem login dan manajemen akun
+- 🛠️ Dashboard admin untuk manajemen data kendaraan dan pengguna
 
-5. Teknologi Digunakan
-  - Frontend : HTML, Tailwind CSS
+## 🛠️ Teknologi yang Digunakan
 
-FITUR UTAMA
-  - Pencarian Smartphone
-  - Perbandingan Spesifikasi antar Smartphone
-  - Rating & Ulasan
+- **Frontend**: HTML, CSS, JavaScript
+- **Styling Framework**: Bootstrap
+- **Backend**: PHP (native, tanpa framework)
+- **Database**: MySQL
