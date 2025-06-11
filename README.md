@@ -1,23 +1,23 @@
-# 🚗🏠 Singgak.com
+# 🚗 Singgak.com
 
-**Singgak.com** adalah aplikasi web yang menjadi penghubung antara calon penyewa dengan penyedia jasa sewa—baik kendaraan maupun rumah—melalui sistem terpusat yang dikelola oleh admin. Aplikasi ini bertujuan mempermudah proses pencarian, penawaran, dan pemesanan layanan sewa secara online, cepat, dan aman.
+**Singgak.com** adalah aplikasi web yang menjadi penghubung antara calon penyewa dengan penyedia jasa sewa kendaraan, seperti mobil dan motor, melalui sistem yang dikelola oleh admin. Aplikasi ini dirancang untuk mempermudah proses pencarian, pemesanan, dan pengelolaan layanan sewa kendaraan secara online.
 
 ## 🔍 Deskripsi
 
-Singgak.com hadir sebagai solusi digital dalam dunia penyewaan, memungkinkan pengguna untuk menemukan jasa sewa yang mereka butuhkan dan melakukan pemesanan dengan mudah. Seluruh data penyedia jasa dikelola langsung oleh **admin**, sehingga informasi yang ditampilkan lebih terverifikasi dan terpercaya.
+Singgak.com hadir sebagai solusi digital dalam bidang penyewaan kendaraan, memungkinkan pengguna untuk menemukan layanan sewa yang mereka butuhkan dengan mudah. Semua data penyedia dan informasi kendaraan dikelola langsung oleh **admin**, sehingga menjamin informasi yang akurat dan terpercaya.
 
 Website ini menyediakan dashboard dengan fitur berbeda untuk dua jenis pengguna:
-- **Penyewa**: Mencari jasa sewa, melakukan pemesanan, dan memberikan ulasan.
-- **Admin**: Mengelola data penyedia jasa, menambahkan atau memperbarui informasi sewa, memverifikasi pemesanan, dan memantau aktivitas sistem.
+- **Penyewa**: Dapat melihat daftar kendaraan yang tersedia, melakukan pemesanan, dan memberikan ulasan setelah menyewa.
+- **Admin**: Bertanggung jawab atas pengelolaan data kendaraan, pengelolaan pemesanan, serta pengaturan akun pengguna.
 
 ## 🚀 Fitur Utama
 
-- 🔎 Pencarian jasa sewa berdasarkan kategori dan lokasi
-- 📋 Daftar layanan sewa kendaraan dan rumah
-- 📝 Pemesanan jasa sewa secara online
-- 💬 Sistem ulasan dan rating dari penyewa
-- 👥 Login dan manajemen akun
-- 🛠️ Dashboard admin untuk mengelola data layanan dan pengguna
+- 🔎 Pencarian kendaraan berdasarkan jenis dan lokasi
+- 📋 Daftar kendaraan lengkap dengan deskripsi dan harga sewa
+- 📝 Sistem pemesanan kendaraan secara online
+- 💬 Ulasan dan rating dari penyewa
+- 👥 Sistem login dan manajemen akun
+- 🛠️ Dashboard admin untuk manajemen data kendaraan dan pengguna
 
 ## 🛠️ Teknologi yang Digunakan
 
