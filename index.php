@@ -1,5 +1,4 @@
 <?php
-// index.php (Perbaikan Final Link Login & Bug Rating)
 session_start();
 require_once "config.php";
 
