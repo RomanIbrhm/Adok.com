@@ -16,11 +16,12 @@ $user_id = (int)$_POST['user_id'];
 $car_id = (int)$_POST['car_id'];
 $start_date_str = $_POST['start_date'];
 $end_date_str = $_POST['end_date'];
+$pickup_location = trim($_POST['pickup_location']); // Mengambil data lokasi
 
-// --- VALIDASI DAN KALKULASI HARGA (Logika ini tetap sama) ---
-// Validasi tanggal dasar
-if (empty($start_date_str) || empty($end_date_str)) {
-    die("Error: Tanggal mulai dan tanggal selesai wajib diisi.");
+// --- VALIDASI DAN KALKULASI HARGA ---
+// Validasi tanggal dan lokasi dasar
+if (empty($start_date_str) || empty($end_date_str) || empty($pickup_location)) {
+    die("Error: Tanggal dan lokasi penjemputan wajib diisi.");
 }
 
 $start_date = new DateTime($start_date_str);
@@ -52,18 +53,17 @@ $insurance_fee = 150; // Biaya asuransi tetap
 $taxes_fee = $rental_fee * 0.10; // Pajak 10%
 $total_price = $rental_fee + $insurance_fee + $taxes_fee;
 
-// --- PERUBAHAN UTAMA: SIMPAN DETAIL BOOKING KE SESSION ---
-// Alih-alih menyimpan ke database, kita simpan semua informasi ke dalam session.
-// Ini mencegah pembuatan booking "hantu" jika pengguna batal membayar.
+// --- SIMPAN DETAIL BOOKING (TERMASUK LOKASI) KE SESSION ---
 $_SESSION['pending_booking'] = [
     'user_id' => $user_id,
     'car_id' => $car_id,
     'start_date' => $start_date_str,
     'end_date' => $end_date_str,
-    'total_price' => $total_price
+    'total_price' => $total_price,
+    'pickup_location' => $pickup_location // Menyimpan lokasi ke session
 ];
 
-// Tutup koneksi database karena kita tidak menggunakannya untuk INSERT di sini
+// Tutup koneksi database
 $conn->close();
 
 // Arahkan pengguna ke halaman pembayaran

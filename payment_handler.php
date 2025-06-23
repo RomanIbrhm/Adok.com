@@ -17,12 +17,11 @@ $car_id = $booking_details['car_id'];
 $start_date = $booking_details['start_date'];
 $end_date = $booking_details['end_date'];
 $total_price = $booking_details['total_price'];
+$pickup_location = $booking_details['pickup_location']; // Mengambil lokasi dari session
 
 $payment_method = $_POST['payment_method']; // 'Card' atau 'Cash'
 
 // --- MULAI TRANSAKSI DATABASE ---
-// Transaksi memastikan bahwa data booking dan pembayaran dibuat bersamaan.
-// Jika salah satu gagal, keduanya akan dibatalkan (rollback).
 $conn->begin_transaction();
 
 try {
@@ -30,10 +29,10 @@ try {
     $booking_status = 'pending'; // Status awal selalu 'pending' untuk konfirmasi admin
     $transaction_status = ($payment_method == 'Card') ? 'successful' : 'pending';
 
-    // 1. BUAT CATATAN BOOKING BARU DI DATABASE
-    $sql_booking = "INSERT INTO bookings (user_id, car_id, start_date, end_date, total_price, booking_status) VALUES (?, ?, ?, ?, ?, ?)";
+    // 1. BUAT CATATAN BOOKING BARU (DENGAN LOKASI) DI DATABASE
+    $sql_booking = "INSERT INTO bookings (user_id, car_id, start_date, end_date, total_price, booking_status, pickup_location) VALUES (?, ?, ?, ?, ?, ?, ?)";
     $stmt_booking = $conn->prepare($sql_booking);
-    $stmt_booking->bind_param("iissds", $user_id, $car_id, $start_date, $end_date, $total_price, $booking_status);
+    $stmt_booking->bind_param("iissdss", $user_id, $car_id, $start_date, $end_date, $total_price, $booking_status, $pickup_location);
     $stmt_booking->execute();
     
     // Ambil ID dari booking yang baru saja dibuat

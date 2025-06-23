@@ -1,5 +1,5 @@
 <?php
-// login.php (Dengan Background Dinamis)
+// login.php (Dengan Background Dinamis dan Pop-up Error)
 
 require_once "config.php";
 
@@ -41,7 +41,6 @@ if ($result_background && $result_background->num_rows > 0) {
 
         .auth-container {
             min-height: 100vh;
-            /* PERUBAHAN DI SINI: Background diambil dari variabel PHP */
             background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('<?php echo htmlspecialchars($background_image); ?>');
             background-size: cover;
             background-position: center;
@@ -196,5 +195,35 @@ if ($result_background && $result_background->num_rows > 0) {
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Membuat URLSearchParams untuk membaca parameter dari URL
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        // Cek jika ada parameter 'error'
+        if (urlParams.has('error')) {
+            const errorType = urlParams.get('error');
+            let message = '';
+
+            if (errorType === 'invalid_credentials') {
+                message = 'Email atau password yang Anda masukkan salah. Silakan coba lagi.';
+            } else if (errorType === 'empty_fields') {
+                message = 'Email dan password tidak boleh kosong.';
+            } else if (errorType === 'loginrequired') {
+                message = 'Anda harus login terlebih dahulu untuk mengakses halaman ini.';
+            }
+
+            if (message) {
+                alert(message);
+            }
+        }
+
+        // Cek jika ada parameter 'signup' untuk notifikasi sukses
+        if (urlParams.has('signup') && urlParams.get('signup') === 'success') {
+            alert('Pendaftaran berhasil! Silakan login dengan akun baru Anda.');
+        }
+    });
+    </script>
+    </body>
 </html>

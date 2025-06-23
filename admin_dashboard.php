@@ -7,8 +7,8 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['user_role'] !== 'admin') {
 }
 require_once "config.php";
 
-// Ambil semua data booking
-$sql = "SELECT b.id, b.start_date, b.end_date, b.total_price, b.booking_status,
+// Ambil semua data booking, termasuk pickup_location
+$sql = "SELECT b.id, b.start_date, b.end_date, b.total_price, b.booking_status, b.pickup_location,
                u.full_name AS user_name,
                c.brand, c.model,
                p.payment_method, p.transaction_status
@@ -55,6 +55,7 @@ $current_page = 'bookings'; // Untuk menandai menu aktif di sidebar
                                 <th>ID</th>
                                 <th>User</th>
                                 <th>Mobil</th>
+                                <th>Lokasi Jemput</th>
                                 <th>Status Pesanan</th>
                                 <th>Status Pembayaran</th>
                                 <th>Aksi</th>
@@ -67,6 +68,7 @@ $current_page = 'bookings'; // Untuk menandai menu aktif di sidebar
                                         <td>#<?php echo $booking['id']; ?></td>
                                         <td><?php echo htmlspecialchars($booking['user_name']); ?></td>
                                         <td><?php echo htmlspecialchars($booking['brand'] . ' ' . $booking['model']); ?></td>
+                                        <td><?php echo htmlspecialchars($booking['pickup_location']); ?></td>
                                         <td>
                                             <?php
                                                 $status = trim($booking['booking_status']);
@@ -100,7 +102,7 @@ $current_page = 'bookings'; // Untuk menandai menu aktif di sidebar
                                     </tr>
                                 <?php endwhile; ?>
                             <?php else: ?>
-                                <tr><td colspan="6" class="text-center">Belum ada pesanan.</td></tr>
+                                <tr><td colspan="7" class="text-center">Belum ada pesanan.</td></tr>
                             <?php endif; ?>
                         </tbody>
                     </table>

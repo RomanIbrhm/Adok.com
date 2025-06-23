@@ -11,23 +11,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Validasi dasar
     if (empty($email) || empty($password)) {
-        header("location: login.html?error=empty_fields");
+        // Mengarahkan ke login.php dengan error 'empty_fields'
+        header("location: login.php?error=empty_fields");
         exit();
     }
 
-    // --- LOGIKA BARU UNTUK LOGIN GABUNGAN ---
+    // --- LOGIKA LOGIN GABUNGAN ---
 
-    // 1. Cek apakah email dan password adalah kredensial admin
-    // Kredensial admin bisa disimpan di sini atau di tabel database terpisah
+    // 1. Cek kredensial admin
     $admin_email = 'admin@singgak.com';
-    $admin_password = 'admin123'; // Sebaiknya gunakan password_hash juga untuk admin
+    $admin_password = 'admin123'; 
 
     if ($email === $admin_email && $password === $admin_password) {
         // Jika cocok, set session sebagai admin
         $_SESSION['loggedin'] = true;
         $_SESSION['user_name'] = 'Admin';
         $_SESSION['user_email'] = $admin_email;
-        $_SESSION['user_role'] = 'admin'; // Set role admin
+        $_SESSION['user_role'] = 'admin';
         
         // Arahkan ke dashboard admin
         header("location: admin_dashboard.php");
@@ -54,7 +54,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         $_SESSION['user_id'] = $id;
                         $_SESSION['user_name'] = $full_name;
                         $_SESSION['user_email'] = $db_email;
-                        $_SESSION['user_role'] = 'user'; // Set role user
+                        $_SESSION['user_role'] = 'user';
                         
                         // Arahkan ke dashboard pengguna
                         header("location: dashboard.php");
@@ -64,7 +64,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
         // Jika email tidak ditemukan atau password salah, arahkan kembali dengan error
-        header("location: login.html?error=invalid_credentials");
+        header("location: login.php?error=invalid_credentials");
         exit();
         
         $stmt->close();
@@ -73,7 +73,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 } else {
     // Jika file diakses langsung, arahkan ke halaman login
-    header("location: login.html");
+    header("location: login.php");
     exit();
 }
 ?>

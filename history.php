@@ -13,7 +13,7 @@ require_once "config.php";
 $user_id = $_SESSION['user_id'];
 $bookings = [];
 $sql_bookings = "SELECT 
-                    b.id, b.start_date, b.end_date, b.total_price, b.booking_status,
+                    b.id, b.start_date, b.end_date, b.total_price, b.booking_status, b.pickup_location,
                     c.brand, c.model, c.image_url
                  FROM bookings b
                  JOIN cars c ON b.car_id = c.id
@@ -104,7 +104,8 @@ $current_page = 'history';
                                         <p class="card-text mb-2">
                                             <small class="text-muted">
                                                 <strong>From:</strong> <?php echo date("d M Y", strtotime($booking['start_date'])); ?><br>
-                                                <strong>To:</strong> <?php echo date("d M Y", strtotime($booking['end_date'])); ?>
+                                                <strong>To:</strong> <?php echo date("d M Y", strtotime($booking['end_date'])); ?><br>
+                                                <strong>Location:</strong> <?php echo htmlspecialchars($booking['pickup_location']); ?>
                                             </small>
                                         </p>
                                         <div class="d-flex justify-content-between align-items-center">

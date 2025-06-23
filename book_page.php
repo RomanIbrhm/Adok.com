@@ -167,6 +167,13 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get current page filename
                                     <label for="dropoffDate" class="form-label">Drop-off Date</label>
                                     <input type="date" class="form-control" id="dropoffDate" name="end_date" required onchange="calculatePrice()">
                                 </div>
+                                <div class="col-12">
+                                    <label for="pickupLocation" class="form-label">Pick-up Location</label>
+                                    <input type="text" class="form-control" id="pickupLocation" name="pickup_location" placeholder="Masukkan alamat atau nama tempat (e.g., Epicentrum Mall)" required>
+                                    <div class="form-text">
+                                        Admin akan menggunakan lokasi ini di peta untuk penjemputan. Pastikan alamat jelas.
+                                    </div>
+                                </div>
                             </div>
                             
                             </form>

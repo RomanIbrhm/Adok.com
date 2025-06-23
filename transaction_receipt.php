@@ -10,10 +10,9 @@ require_once "config.php";
 
 $booking_id = (int)$_GET['booking_id'];
 
-// --- PERBAIKAN QUERY SQL ---
-// Menghapus "p.created_at AS payment_date" dari SELECT list
+// --- PERBAIKAN QUERY SQL UNTUK MENGAMBIL LOKASI ---
 $sql = "SELECT
-            b.id AS booking_id, b.start_date, b.end_date, b.total_price, b.booking_status,
+            b.id AS booking_id, b.start_date, b.end_date, b.total_price, b.booking_status, b.pickup_location,
             c.brand, c.model, c.image_url, c.price_per_day,
             u.full_name AS user_name, u.email AS user_email,
             p.payment_method, p.transaction_status
@@ -25,7 +24,6 @@ $sql = "SELECT
 
 $stmt = $conn->prepare($sql);
 
-// Menambahkan pengecekan jika prepare gagal untuk debugging di masa depan
 if ($stmt === false) {
     die("Gagal mempersiapkan statement SQL: " . $conn->error);
 }
@@ -85,7 +83,15 @@ if($duration == 0) $duration = 1; // Minimum 1 hari
                     <div class="col-6 text-end">
                         <h5 class="mb-1">Detail Transaksi:</h5>
                         <p class="mb-0 font-monospace">ID: #<?php echo $receipt['booking_id']; ?></p>
-                        <p class="mb-0 font-monospace">Tanggal: <?php echo date("d M Y", strtotime($receipt['start_date'])); ?></p>
+                        <p class="mb-0 font-monospace">Tanggal Pesan: <?php echo date("d M Y"); ?></p>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h5 class="mb-2">Lokasi & Jadwal Penjemputan</h5>
+                    <div class="p-3 rounded" style="background-color: #f8f9fa;">
+                         <p class="mb-1"><strong>Alamat:</strong> <?php echo htmlspecialchars($receipt['pickup_location']); ?></p>
+                         <p class="mb-0"><strong>Tanggal:</strong> <?php echo date("d M Y", strtotime($receipt['start_date'])); ?></p>
                     </div>
                 </div>
 
