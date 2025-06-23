@@ -15,7 +15,6 @@ Website ini menyediakan dashboard dengan fitur berbeda untuk dua jenis pengguna:
 - 🔎 Pencarian kendaraan berdasarkan jenis
 - 📋 Daftar kendaraan lengkap dengan deskripsi dan harga sewa
 - 📝 Sistem pemesanan kendaraan secara online
-- 💬 Ulasan dan rating dari penyewa
 - 👥 Sistem login dan manajemen akun
 - 🛠️ Dashboard admin untuk manajemen data kendaraan dan pengguna
 
