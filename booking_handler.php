@@ -15,17 +15,32 @@ require_once "config.php";
 $user_id = (int)$_POST['user_id'];
 $car_id = (int)$_POST['car_id'];
 $start_date_str = $_POST['start_date'];
+$pickup_time_str = $_POST['pickup_time'];
 $end_date_str = $_POST['end_date'];
-$pickup_location = trim($_POST['pickup_location']); // Mengambil data lokasi
+$pickup_location = trim($_POST['pickup_location']);
 
 // --- VALIDASI DAN KALKULASI HARGA ---
-// Validasi tanggal dan lokasi dasar
-if (empty($start_date_str) || empty($end_date_str) || empty($pickup_location)) {
-    die("Error: Tanggal dan lokasi penjemputan wajib diisi.");
+// Validasi tanggal, waktu, dan lokasi dasar
+if (empty($start_date_str) || empty($pickup_time_str) || empty($end_date_str) || empty($pickup_location)) {
+    die("Error: Tanggal, waktu, dan lokasi penjemputan wajib diisi.");
 }
 
-$start_date = new DateTime($start_date_str);
+// ===============================================
+// === PERUBAHAN: VALIDASI JAM KERJA DI SERVER ===
+// ===============================================
+$min_time = '08:00';
+$max_time = '20:00';
+if ($pickup_time_str < $min_time || $pickup_time_str > $max_time) {
+    die("Error: Waktu penjemputan harus di antara jam 08:00 dan 20:00.");
+}
+
+
+// GABUNGKAN TANGGAL DAN WAKTU
+$start_datetime_str = $start_date_str . ' ' . $pickup_time_str;
+
+$start_date = new DateTime($start_datetime_str);
 $end_date = new DateTime($end_date_str);
+
 
 // Pastikan tanggal selesai tidak lebih awal dari tanggal mulai
 if ($end_date <= $start_date) {
@@ -57,10 +72,10 @@ $total_price = $rental_fee + $insurance_fee + $taxes_fee;
 $_SESSION['pending_booking'] = [
     'user_id' => $user_id,
     'car_id' => $car_id,
-    'start_date' => $start_date_str,
+    'start_date' => $start_datetime_str, // Menyimpan tanggal dan waktu lengkap
     'end_date' => $end_date_str,
     'total_price' => $total_price,
-    'pickup_location' => $pickup_location // Menyimpan lokasi ke session
+    'pickup_location' => $pickup_location
 ];
 
 // Tutup koneksi database

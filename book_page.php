@@ -1,5 +1,5 @@
 <?php
-// book_page.php
+// RENTAL/book_page.php
 
 // Mulai sesi
 session_start();
@@ -164,6 +164,11 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get current page filename
                                     <input type="date" class="form-control" id="pickupDate" name="start_date" required onchange="calculatePrice()">
                                 </div>
                                 <div class="col-md-6">
+                                    <label for="pickupTime" class="form-label">Pick-up Time</label>
+                                    <input type="time" class="form-control" id="pickupTime" name="pickup_time" required min="08:00" max="20:00">
+                                    <div class="form-text">Jam operasional: 08:00 - 20:00.</div>
+                                </div>
+                                <div class="col-12">
                                     <label for="dropoffDate" class="form-label">Drop-off Date</label>
                                     <input type="date" class="form-control" id="dropoffDate" name="end_date" required onchange="calculatePrice()">
                                 </div>

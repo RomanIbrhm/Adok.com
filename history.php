@@ -1,6 +1,4 @@
 <?php
-// RENTAL/history.php
-
 session_start();
 
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
@@ -12,11 +10,15 @@ require_once "config.php";
 
 $user_id = $_SESSION['user_id'];
 $bookings = [];
+
+// Menambahkan r.rating dan r.review_text
 $sql_bookings = "SELECT 
-                    b.id, b.start_date, b.end_date, b.total_price, b.booking_status, b.pickup_location,
-                    c.brand, c.model, c.image_url
+                    b.id, b.start_date, b.end_date, b.total_price, b.booking_status, b.car_id, b.pickup_location,
+                    c.brand, c.model, c.image_url,
+                    r.id as review_id, r.rating, r.review_text
                  FROM bookings b
                  JOIN cars c ON b.car_id = c.id
+                 LEFT JOIN reviews r ON b.id = r.booking_id
                  WHERE b.user_id = ?
                  ORDER BY b.id DESC";
 
@@ -48,46 +50,52 @@ $current_page = 'history';
     <style>
       :root {
             --bs-primary-rgb: 245, 183, 84;
-        }
+      }
+      .rating-stars label {
+        font-size: 2rem;
+        color: #ddd;
+        cursor: pointer;
+        transition: color 0.2s;
+      }
+      .rating-stars input:checked ~ label,
+      .rating-stars label:hover,
+      .rating-stars label:hover ~ label {
+        color: #f5b754;
+      }
+      .rating-stars {
+        display: inline-block;
+        direction: rtl; /* Bintang dari kanan ke kiri */
+      }
+      .rating-stars input { display: none; }
     </style>
 </head>
 <body>
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-         <div class="container">
-            <a class="navbar-brand fs-3 fw-bold" href="dashboard.php">
-                <i class="fas fa-car-side text-primary me-2"></i>singgak
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav mx-auto">
-                    <li class="nav-item"><a class="nav-link" href="dashboard.php">Home</a></li>
-                    <li class="nav-item"><a class="nav-link <?php echo ($current_page == 'history') ? 'active' : ''; ?>" href="history.php">My Bookings</a></li>
-                    <li class="nav-item"><a class="nav-link" href="book_page.php">Book Now</a></li>
-                </ul>
-                <div class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-user-circle me-1"></i> Hi, <?php echo htmlspecialchars($_SESSION['user_name']); ?>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
-                         <li><h6 class="dropdown-header">Hi, <?php echo htmlspecialchars($_SESSION['user_name']); ?></h6></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="edit_profile.php">Edit Profile</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="logout.php">Logout</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </nav>
+        </nav>
 
     <main class="container py-5" style="margin-top: 80px;">
         <div class="text-center mb-5">
             <h1 class="section-title">Booking History</h1>
             <p class="lead text-muted">Here is a complete list of all your bookings.</p>
         </div>
+
+        <div class="mb-4">
+            <a href="dashboard.php" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Kembali ke Dashboard
+            </a>
+        </div>
+
+
+        <?php if(isset($_GET['status'])): ?>
+            <?php if($_GET['status'] == 'review_success'): ?>
+                <div class="alert alert-success">Terima kasih, ulasan Anda berhasil dikirim!</div>
+            <?php elseif($_GET['status'] == 'review_failed'): ?>
+                <div class="alert alert-danger">Gagal mengirim ulasan. Silakan coba lagi.</div>
+            <?php elseif($_GET['status'] == 'already_reviewed'): ?>
+                 <div class="alert alert-warning">Anda sudah memberikan ulasan untuk pesanan ini.</div>
+            <?php endif; ?>
+        <?php endif; ?>
 
         <div class="row gy-4">
             <?php if (count($bookings) > 0): ?>
@@ -99,27 +107,46 @@ $current_page = 'history';
                                     <img src="<?php echo htmlspecialchars($booking['image_url']); ?>" class="img-fluid rounded-start p-2" alt="<?php echo htmlspecialchars($booking['brand']); ?>">
                                 </div>
                                 <div class="col-md-7">
-                                    <div class="card-body">
+                                    <div class="card-body d-flex flex-column">
                                         <h5 class="card-title fw-bold"><?php echo htmlspecialchars($booking['brand'] . ' ' . $booking['model']); ?></h5>
                                         <p class="card-text mb-2">
                                             <small class="text-muted">
-                                                <strong>From:</strong> <?php echo date("d M Y", strtotime($booking['start_date'])); ?><br>
+                                                <strong>From:</strong> <?php echo date("d M Y, H:i", strtotime($booking['start_date'])); ?><br>
                                                 <strong>To:</strong> <?php echo date("d M Y", strtotime($booking['end_date'])); ?><br>
-                                                <strong>Location:</strong> <?php echo htmlspecialchars($booking['pickup_location']); ?>
+                                                
+                                                <strong>Location:</strong> <?php echo htmlspecialchars($booking['pickup_location'] ?? 'Lokasi tidak ditentukan'); ?>
                                             </small>
                                         </p>
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <?php
-                                                $status = trim($booking['booking_status']);
-                                                $badge_class = 'bg-secondary';
-                                                $status_text = 'Unknown Status';
+                                        
+                                        <?php if (!is_null($booking['review_id'])): ?>
+                                            <div class="mt-2 p-2 rounded" style="background-color: #f8f9fa;">
+                                                <h6 class="fw-bold small">Ulasan Anda:</h6>
+                                                <div class="mb-1">
+                                                    <?php for ($i = 0; $i < 5; $i++): ?>
+                                                        <i class="<?php echo ($i < $booking['rating']) ? 'fas' : 'far'; ?> fa-star text-warning"></i>
+                                                    <?php endfor; ?>
+                                                </div>
+                                                <p class="small fst-italic mb-0">"<?php echo htmlspecialchars($booking['review_text']); ?>"</p>
+                                            </div>
+                                        <?php endif; ?>
 
-                                                if ($status === 'confirmed') { $badge_class = 'bg-success'; $status_text = 'Confirmed';}
-                                                elseif ($status === 'pending') {$badge_class = 'bg-warning text-dark'; $status_text = 'Pending';}
-                                                elseif ($status === 'rejected') {$badge_class = 'bg-danger'; $status_text = 'Rejected';}
+                                        <div class="mt-auto pt-3">
+                                            <a href="transaction_receipt.php?booking_id=<?php echo $booking['id']; ?>" class="btn btn-sm btn-outline-secondary">Lihat Struk</a>
+                                            
+                                            <?php
+                                            // Cek apakah pesanan sudah selesai dan belum direview
+                                            $endDate = new DateTime($booking['end_date']);
+                                            $today = new DateTime();
+                                            if ($endDate < $today && is_null($booking['review_id'])) :
                                             ?>
-                                            <span class="badge <?php echo $badge_class; ?> text-capitalize"><?php echo htmlspecialchars($status_text); ?></span>
-                                            <span class="fw-bold fs-5 text-primary">$<?php echo number_format($booking['total_price'], 2); ?></span>
+                                                <button type="button" class="btn btn-sm btn-primary review-btn" 
+                                                        data-bs-toggle="modal" 
+                                                        data-bs-target="#reviewModal"
+                                                        data-booking-id="<?php echo $booking['id']; ?>"
+                                                        data-car-id="<?php echo $booking['car_id']; ?>">
+                                                    Beri Ulasan
+                                                </button>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 </div>
@@ -128,23 +155,69 @@ $current_page = 'history';
                     </div>
                 <?php endforeach; ?>
             <?php else: ?>
-                <div class="col-12 text-center">
-                    <p class="text-muted fs-5">You do not have a booking history yet.</p>
-                    <a href="book_page.php" class="btn btn-primary rounded-pill">Make Your First Booking</a>
-                </div>
+                <tr><td colspan="5" class="text-center">Tidak ada riwayat pesanan.</td></tr>
             <?php endif; ?>
         </div>
-         <div class="text-center mt-5">
-            <a href="dashboard.php" class="btn btn-secondary">Back to Dashboard</a>
-        </div>
     </main>
+    
+    <div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <form action="submit_review_handler.php" method="POST">
+            <div class="modal-header">
+              <h5 class="modal-title" id="reviewModalLabel">Bagaimana pengalaman Anda?</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p>Berikan rating dan ulasan Anda untuk pesanan ini.</p>
+              <input type="hidden" name="booking_id" id="modal_booking_id">
+              <input type="hidden" name="car_id" id="modal_car_id">
+              <input type="hidden" name="source" value="history">
+              
+              <div class="text-center mb-3">
+                  <div class="rating-stars">
+                      <input type="radio" id="star5" name="rating" value="5" required/><label for="star5" title="5 stars">★</label>
+                      <input type="radio" id="star4" name="rating" value="4"/><label for="star4" title="4 stars">★</label>
+                      <input type="radio" id="star3" name="rating" value="3"/><label for="star3" title="3 stars">★</label>
+                      <input type="radio" id="star2" name="rating" value="2"/><label for="star2" title="2 stars">★</label>
+                      <input type="radio" id="star1" name="rating" value="1"/><label for="star1" title="1 star">★</label>
+                  </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="review_text" class="form-label">Ulasan Anda (Opsional)</label>
+                <textarea class="form-control" id="review_text" name="review_text" rows="4" placeholder="Ceritakan pengalaman Anda..."></textarea>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+              <button type="submit" class="btn btn-primary">Kirim Ulasan</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
 
     <footer class="text-white pt-5 pb-4 mt-5 bg-dark">
-       <div class="container text-center pt-4">
-            <p>&copy; <?php echo date("Y"); ?> Singgak. All rights reserved.</p>
-       </div>
-    </footer>
+        </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Script untuk mengambil data-id dan memasukkannya ke dalam modal
+        const reviewModal = document.getElementById('reviewModal');
+        if (reviewModal) {
+            reviewModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const bookingId = button.getAttribute('data-booking-id');
+                const carId = button.getAttribute('data-car-id');
+
+                const modalBookingIdInput = reviewModal.querySelector('#modal_booking_id');
+                const modalCarIdInput = reviewModal.querySelector('#modal_car_id');
+
+                modalBookingIdInput.value = bookingId;
+                modalCarIdInput.value = carId;
+            });
+        }
+    </script>
 </body>
 </html>

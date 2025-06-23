@@ -91,7 +91,7 @@ if($duration == 0) $duration = 1; // Minimum 1 hari
                     <h5 class="mb-2">Lokasi & Jadwal Penjemputan</h5>
                     <div class="p-3 rounded" style="background-color: #f8f9fa;">
                          <p class="mb-1"><strong>Alamat:</strong> <?php echo htmlspecialchars($receipt['pickup_location']); ?></p>
-                         <p class="mb-0"><strong>Tanggal:</strong> <?php echo date("d M Y", strtotime($receipt['start_date'])); ?></p>
+                         <p class="mb-0"><strong>Waktu:</strong> <?php echo date("d M Y, H:i", strtotime($receipt['start_date'])); ?></p>
                     </div>
                 </div>
 

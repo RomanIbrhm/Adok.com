@@ -9,7 +9,7 @@ require_once "config.php";
 
 // Ambil semua data booking, termasuk pickup_location
 $sql = "SELECT b.id, b.start_date, b.end_date, b.total_price, b.booking_status, b.pickup_location,
-               u.full_name AS user_name,
+               u.full_name AS user_name, u.email AS user_email,
                c.brand, c.model,
                p.payment_method, p.transaction_status
         FROM bookings b
@@ -32,6 +32,12 @@ $current_page = 'bookings'; // Untuk menandai menu aktif di sidebar
         :root{
             --bs-primary-rgb : 245,183,84;
         }
+        .table th {
+            font-weight: 600;
+        }
+        .table td {
+            vertical-align: middle;
+        }
     </style>
 </head>
 <body>
@@ -46,18 +52,18 @@ $current_page = 'bookings'; // Untuk menandai menu aktif di sidebar
             </div>
         <?php endif; ?>
         <div class="card shadow-sm">
-            <div class="card-header"><h5 class="mb-0">Daftar Pesanan</h5></div>
+            <div class="card-header"><h5 class="mb-0">Daftar Lengkap Pesanan</h5></div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle">
                         <thead class="table-light">
                             <tr>
-                                <th>ID</th>
-                                <th>User</th>
-                                <th>Mobil</th>
-                                <th>Lokasi Jemput</th>
-                                <th>Status Pesanan</th>
-                                <th>Status Pembayaran</th>
+                                <th>ID Pesanan</th>
+                                <th>Pemesan</th>
+                                <th>Kendaraan</th>
+                                <th>Jadwal Rental & Lokasi</th>
+                                <th>Detail Pembayaran</th>
+                                <th>Status</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -65,38 +71,47 @@ $current_page = 'bookings'; // Untuk menandai menu aktif di sidebar
                             <?php if ($bookings && $bookings->num_rows > 0): ?>
                                 <?php while($booking = $bookings->fetch_assoc()): ?>
                                     <tr>
-                                        <td>#<?php echo $booking['id']; ?></td>
-                                        <td><?php echo htmlspecialchars($booking['user_name']); ?></td>
+                                        <td><strong>#<?php echo $booking['id']; ?></strong></td>
+                                        <td>
+                                            <?php echo htmlspecialchars($booking['user_name']); ?><br>
+                                            <small class="text-muted"><?php echo htmlspecialchars($booking['user_email']); ?></small>
+                                        </td>
                                         <td><?php echo htmlspecialchars($booking['brand'] . ' ' . $booking['model']); ?></td>
-                                        <td><?php echo htmlspecialchars($booking['pickup_location']); ?></td>
+                                        <td>
+                                            <strong>Mulai:</strong> <?php echo date("d M Y, H:i", strtotime($booking['start_date'])); ?><br>
+                                            <strong>Selesai:</strong> <?php echo date("d M Y", strtotime($booking['end_date'])); ?><br>
+                                            <strong>Lokasi:</strong> <span class="text-muted"><?php echo htmlspecialchars($booking['pickup_location']); ?></span>
+                                        </td>
+                                        <td>
+                                            <strong class="fs-6">$<?php echo number_format($booking['total_price'], 2); ?></strong><br>
+                                            <small>via <?php echo htmlspecialchars($booking['payment_method']); ?></small>
+                                        </td>
                                         <td>
                                             <?php
+                                                // Logika untuk Badge Status Pesanan
                                                 $status = trim($booking['booking_status']);
                                                 $badge_class = 'bg-secondary';
-                                                $status_text = 'Tidak Dikenali';
+                                                if ($status === 'confirmed') { $badge_class = 'bg-success'; } 
+                                                elseif ($status === 'pending') { $badge_class = 'bg-warning text-dark'; } 
+                                                elseif ($status === 'rejected') { $badge_class = 'bg-danger'; }
+                                                echo '<span class="badge ' . $badge_class . ' text-capitalize mb-1 d-block">' . htmlspecialchars($status) . '</span>';
 
-                                                if ($status === 'confirmed') { $badge_class = 'bg-success'; $status_text = 'Confirmed'; } 
-                                                elseif ($status === 'pending') { $badge_class = 'bg-warning text-dark'; $status_text = 'Pending'; } 
-                                                elseif ($status === 'rejected') { $badge_class = 'bg-danger'; $status_text = 'Rejected'; } 
-                                                elseif ($status === 'awaiting_payment') { $badge_class = 'bg-info text-dark'; $status_text = 'Awaiting Payment'; } 
-                                                elseif ($status === 'cancelled') { $badge_class = 'bg-dark'; $status_text = 'Cancelled'; }
-                                            ?>
-                                            <span class="badge <?php echo $badge_class; ?> text-capitalize"><?php echo htmlspecialchars($status_text); ?></span>
-                                        </td>
-                                        <td>
-                                            <?php
+                                                // Logika untuk Badge Status Pembayaran
                                                 $pay_status = $booking['transaction_status'];
-                                                if ($pay_status == 'successful') { echo '<span class="badge bg-success">Successful</span>'; }
-                                                elseif ($pay_status == 'pending') { echo '<span class="badge bg-warning text-dark">Pending (Cash)</span>'; }
-                                                else { echo '<span class="badge bg-secondary">N/A</span>'; }
+                                                $pay_badge = 'bg-secondary';
+                                                if ($pay_status == 'successful') { $pay_badge = 'bg-success'; }
+                                                elseif ($pay_status == 'pending') { $pay_badge = 'bg-warning text-dark'; }
+                                                echo '<span class="badge ' . $pay_badge . ' text-capitalize d-block">Payment: ' . htmlspecialchars($pay_status) . '</span>';
                                             ?>
                                         </td>
                                         <td>
-                                            <?php if ($status == 'pending'): ?>
-                                                <a href="update_booking_status.php?id=<?php echo $booking['id']; ?>&action=confirm" class="btn btn-sm btn-success" title="Konfirmasi Pesanan"><i class="fas fa-check"></i></a>
-                                                <a href="update_booking_status.php?id=<?php echo $booking['id']; ?>&action=reject" class="btn btn-sm btn-danger" title="Tolak Pesanan"><i class="fas fa-times"></i></a>
+                                            <?php if ($booking['booking_status'] == 'pending'): ?>
+                                                <div class="btn-group">
+                                                    <a href="update_booking_status.php?id=<?php echo $booking['id']; ?>&action=confirm" class="btn btn-sm btn-success" title="Konfirmasi Pesanan"><i class="fas fa-check"></i></a>
+                                                    <a href="update_booking_status.php?id=<?php echo $booking['id']; ?>&action=reject" class="btn btn-sm btn-danger" title="Tolak Pesanan"><i class="fas fa-times"></i></a>
+                                                </div>
                                             <?php else: ?>
-                                                -
+                                                <span class="text-muted">-</span>
                                             <?php endif; ?>
                                         </td>
                                     </tr>
