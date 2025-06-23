@@ -2,7 +2,7 @@
 session_start();
 // Hanya admin yang bisa mengakses halaman ini
 if (!isset($_SESSION['loggedin']) || $_SESSION['user_role'] !== 'admin') {
-    header('location: login.html');
+    header('location: login.php');
     exit;
 }
 require_once "config.php";
@@ -21,12 +21,11 @@ $current_page = 'vehicles'; // Untuk menandai menu aktif di sidebar
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
     <style>
-        /* CSS untuk memastikan form di dalam tabel tidak merusak layout */
         .status-form .form-check {
-            margin-bottom: 0.25rem; /* Memberi sedikit jarak antar radio button */
+            margin-bottom: 0.25rem;
         }
         .table-responsive {
-            min-height: 500px; /* Memberi ruang agar tidak terasa sempit */
+            min-height: 500px;
         }
         :root{
             --bs-primary-rgb : 245,183,84;
@@ -38,9 +37,24 @@ $current_page = 'vehicles'; // Untuk menandai menu aktif di sidebar
     <?php include 'admin_sidebar.php'; ?>
     <div class="container-fluid p-4">
         <h1 class="mb-4">Vehicle Management</h1>
-        
+
         <?php if(isset($_GET['status'])): ?>
-            <?php if($_GET['status'] == 'update_success'): ?>
+            <?php if($_GET['status'] == 'delete_success'): ?>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <strong>Berhasil!</strong> Mobil telah dihapus.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <?php elseif($_GET['status'] == 'delete_error_rented'): ?>
+                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>Gagal!</strong> Mobil yang sedang disewa tidak dapat dihapus.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <?php elseif($_GET['status'] == 'delete_error'): ?>
+                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>Gagal!</strong> Terjadi kesalahan saat menghapus mobil.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <?php elseif($_GET['status'] == 'update_success'): ?>
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <strong>Berhasil!</strong> Status mobil telah diperbarui.
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -86,7 +100,7 @@ $current_page = 'vehicles'; // Untuk menandai menu aktif di sidebar
                                         <td><?php echo htmlspecialchars($car['brand'] . ' ' . $car['model']); ?></td>
                                         <td>$<?php echo number_format($car['price_per_day']); ?></td>
                                         <td>
-                                            <span class="badge fs-6 <?php 
+                                            <span class="badge fs-6 <?php
                                                     if ($car['status'] == 'available') echo 'bg-success';
                                                     elseif ($car['status'] == 'rented') echo 'bg-warning text-dark';
                                                     else echo 'bg-secondary';
@@ -113,7 +127,9 @@ $current_page = 'vehicles'; // Untuk menandai menu aktif di sidebar
                                         </td>
                                         <td>
                                             <a href="admin_edit_vehicle.php?id=<?php echo $car['id']; ?>" class="btn btn-sm btn-info text-white" data-bs-toggle="tooltip" title="Edit Detail Mobil"><i class="fas fa-edit"></i></a>
-                                            <a href="#" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" title="Hapus Mobil"><i class="fas fa-trash"></i></a>
+                                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteVehicleModal" data-vehicle-id="<?php echo $car['id']; ?>" data-bs-toggle="tooltip" title="Hapus Mobil">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
                                         </td>
                                     </tr>
                                 <?php endwhile; ?>
@@ -127,13 +143,43 @@ $current_page = 'vehicles'; // Untuk menandai menu aktif di sidebar
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="deleteVehicleModal" tabindex="-1" aria-labelledby="deleteVehicleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteVehicleModalLabel">Konfirmasi Hapus Mobil</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Apakah Anda yakin ingin menghapus mobil ini secara permanen? Tindakan ini tidak dapat diurungkan.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <a id="confirmDeleteButton" href="#" class="btn btn-danger">Ya, Hapus</a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     // Inisialisasi Tooltip Bootstrap
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
       return new bootstrap.Tooltip(tooltipTriggerEl)
-    })
+    });
+
+    // [PERBAIKAN] JavaScript untuk modal konfirmasi hapus
+    const deleteVehicleModal = document.getElementById('deleteVehicleModal');
+    if (deleteVehicleModal) {
+        deleteVehicleModal.addEventListener('show.bs.modal', function (event) {
+          const button = event.relatedTarget;
+          const vehicleId = button.getAttribute('data-vehicle-id');
+          const confirmDeleteButton = document.getElementById('confirmDeleteButton');
+          confirmDeleteButton.href = `admin_delete_vehicle.php?id=${vehicleId}`;
+        });
+    }
 </script>
 </body>
 </html>

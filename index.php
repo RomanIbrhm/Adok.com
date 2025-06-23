@@ -1,5 +1,5 @@
 <?php
-// index.php (Perbaikan Final Link Login)
+// index.php (Perbaikan Final Link Login & Bug Rating)
 session_start();
 require_once "config.php";
 
@@ -17,13 +17,17 @@ if ($result_slideshow && $result_slideshow->num_rows > 0) {
     $slideshow_images[] = 'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?q=80&w=2100&auto=format&fit=crop';
 }
 
-
-// --- Ambil data mobil yang tersedia (3 mobil acak untuk tampilan awal) ---
-$sql_initial_cars = "SELECT id, brand, model, seater, transmission, fuel_type, price_per_day, image_url 
-                     FROM cars 
-                     WHERE status = 'available' 
-                     ORDER BY RAND() 
-                     LIMIT 3";
+// [PERBAIKAN] Query diubah untuk mengambil data rating
+$sql_initial_cars = "SELECT
+                        c.id, c.brand, c.model, c.seater, c.transmission, c.fuel_type, c.price_per_day, c.image_url,
+                        AVG(r.rating) as avg_rating,
+                        COUNT(r.id) as review_count
+                    FROM cars c
+                    LEFT JOIN reviews r ON c.id = r.car_id
+                    WHERE c.status = 'available'
+                    GROUP BY c.id
+                    ORDER BY RAND()
+                    LIMIT 3";
 $result_initial_cars = $conn->query($sql_initial_cars);
 
 
@@ -41,7 +45,7 @@ if ($result_brands->num_rows > 0) {
 $main_rent_now_url = "login.php"; // Default jika belum login
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
     // Jika sudah login, arahkan ke halaman booking
-    $main_rent_now_url = "book_page.php"; 
+    $main_rent_now_url = "book_page.php";
 }
 ?>
 <!DOCTYPE html>
@@ -71,7 +75,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
             padding: 0.75rem 0;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        
+
         #heroCarousel { height: 100vh; margin-top: -80px; }
         .carousel-inner, .carousel-item { height: 100%; }
         .carousel-item img { height: 100%; object-fit: cover; width: 100%; }
@@ -120,7 +124,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
     </nav>
 
     <header id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="2000">
-        
+
         <div class="carousel-indicators">
             <?php foreach ($slideshow_images as $i => $image): ?>
                 <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="<?php echo $i; ?>" class="<?php echo ($i == 0) ? 'active' : ''; ?>" aria-current="true" aria-label="Slide <?php echo $i + 1; ?>"></button>
@@ -142,7 +146,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
                 <a href="<?php echo $main_rent_now_url; ?>" class="btn btn-primary rounded-pill">Rent Now</a>
             </div>
         </div>
-        
+
         <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
             <span class="visually-hidden">Previous</span>
@@ -175,7 +179,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
                     </div>
                 </div>
             </div>
-            
+
             <div id="carListContainer" class="row">
                 <?php if ($result_initial_cars && $result_initial_cars->num_rows > 0): ?>
                     <?php while($car = $result_initial_cars->fetch_assoc()): ?>
@@ -184,6 +188,21 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
                             <img src="<?php echo htmlspecialchars($car['image_url']); ?>" class="card-img-top p-3" alt="<?php echo htmlspecialchars($car['brand'] . ' ' . $car['model']); ?>" style="height: 200px; object-fit: cover;">
                             <div class="card-body d-flex flex-column">
                                 <h5 class="fw-bold"><?php echo htmlspecialchars($car['brand'] . ' ' . $car['model']); ?></h5>
+
+                                <div class="d-flex align-items-center mb-2">
+                                    <?php
+                                        $avg_rating = $car['avg_rating'] ?? 0;
+                                        $review_count = $car['review_count'] ?? 0;
+                                        $full_stars = floor($avg_rating);
+                                        $half_star = ($avg_rating - $full_stars) >= 0.5;
+                                        $empty_stars = 5 - $full_stars - ($half_star ? 1 : 0);
+                                    ?>
+                                    <?php for ($i = 0; $i < $full_stars; $i++): ?><i class="fas fa-star text-warning"></i><?php endfor; ?>
+                                    <?php if ($half_star): ?><i class="fas fa-star-half-alt text-warning"></i><?php endif; ?>
+                                    <?php for ($i = 0; $i < $empty_stars; $i++): ?><i class="far fa-star text-warning"></i><?php endfor; ?>
+                                    <span class="ms-2 text-muted small">(<?php echo $review_count; ?> ulasan)</span>
+                                </div>
+
                                 <div class="d-flex justify-content-between text-muted small mb-3">
                                     <span><i class="fas fa-user-friends me-1 text-primary"></i><?php echo htmlspecialchars($car['seater']); ?> Seater</span>
                                     <span><i class="fas fa-cogs me-1 text-primary"></i><?php echo htmlspecialchars($car['transmission']); ?></span>
@@ -274,9 +293,9 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
         document.getElementById('brandFilter').addEventListener('change', function() {
             const selectedBrand = this.value;
             const carListContainer = document.getElementById('carListContainer');
-            
+
             carListContainer.innerHTML = '<div class="col-12 text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
-            
+
             fetch(`ajax_search_cars.php?brand=${selectedBrand}&source=index`)
                 .then(response => response.text())
                 .then(html => {
