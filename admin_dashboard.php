@@ -1,14 +1,14 @@
 <?php
 session_start();
-// Hanya admin yang bisa mengakses halaman ini
+
 if (!isset($_SESSION['loggedin']) || $_SESSION['user_role'] !== 'admin') {
     header('location: login.html');
     exit;
 }
 require_once "config.php";
 
-// Ambil semua data booking, termasuk pickup_location
-$sql = "SELECT b.id, b.start_date, b.end_date, b.total_price, b.booking_status, b.pickup_location,
+// Ambil semua data booking, termasuk nomor telepon
+$sql = "SELECT b.id, b.start_date, b.end_date, b.total_price, b.booking_status, b.pickup_location, b.sim_image_url, b.phone_number,
                u.full_name AS user_name, u.email AS user_email,
                c.brand, c.model,
                p.payment_method, p.transaction_status
@@ -19,7 +19,7 @@ $sql = "SELECT b.id, b.start_date, b.end_date, b.total_price, b.booking_status, 
         ORDER BY b.id DESC";
 $bookings = $conn->query($sql);
 
-$current_page = 'bookings'; // Untuk menandai menu aktif di sidebar
+$current_page = 'bookings';
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -74,21 +74,25 @@ $current_page = 'bookings'; // Untuk menandai menu aktif di sidebar
                                         <td><strong>#<?php echo $booking['id']; ?></strong></td>
                                         <td>
                                             <?php echo htmlspecialchars($booking['user_name']); ?><br>
-                                            <small class="text-muted"><?php echo htmlspecialchars($booking['user_email']); ?></small>
+                                            <small class="text-muted"><?php echo htmlspecialchars($booking['user_email']); ?></small><br>
+                                            <small class="text-primary fw-bold"><i class="fas fa-phone-alt me-1"></i><?php echo htmlspecialchars($booking['phone_number']); ?></small>
                                         </td>
                                         <td><?php echo htmlspecialchars($booking['brand'] . ' ' . $booking['model']); ?></td>
                                         <td>
                                             <strong>Mulai:</strong> <?php echo date("d M Y, H:i", strtotime($booking['start_date'])); ?><br>
                                             <strong>Selesai:</strong> <?php echo date("d M Y", strtotime($booking['end_date'])); ?><br>
-                                            <strong>Lokasi:</strong> <span class="text-muted"><?php echo htmlspecialchars($booking['pickup_location']); ?></span>
+                                            <strong>Lokasi:</strong> <span class="text-muted"><?php echo htmlspecialchars($booking['pickup_location']); ?></span><br>
+                                            <?php if (!empty($booking['sim_image_url'])): ?>
+                                                <strong>SIM:</strong> 
+                                                <a href="<?php echo htmlspecialchars($booking['sim_image_url']); ?>" target="_blank" class="btn btn-outline-info btn-sm py-0 px-1">Lihat SIM</a>
+                                            <?php endif; ?>
                                         </td>
                                         <td>
-                                            <strong class="fs-6">$<?php echo number_format($booking['total_price'], 2); ?></strong><br>
+                                            <strong class="fs-6">Rp.<?php echo number_format($booking['total_price'], 2); ?></strong><br>
                                             <small>via <?php echo htmlspecialchars($booking['payment_method']); ?></small>
                                         </td>
                                         <td>
                                             <?php
-                                                // Logika untuk Badge Status Pesanan
                                                 $status = trim($booking['booking_status']);
                                                 $badge_class = 'bg-secondary';
                                                 if ($status === 'confirmed') { $badge_class = 'bg-success'; } 
@@ -96,7 +100,6 @@ $current_page = 'bookings'; // Untuk menandai menu aktif di sidebar
                                                 elseif ($status === 'rejected') { $badge_class = 'bg-danger'; }
                                                 echo '<span class="badge ' . $badge_class . ' text-capitalize mb-1 d-block">' . htmlspecialchars($status) . '</span>';
 
-                                                // Logika untuk Badge Status Pembayaran
                                                 $pay_status = $booking['transaction_status'];
                                                 $pay_badge = 'bg-secondary';
                                                 if ($pay_status == 'successful') { $pay_badge = 'bg-success'; }

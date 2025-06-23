@@ -2,7 +2,7 @@
 // RENTAL/payment_handler.php
 
 session_start();
-// Pastikan ada data booking yang pending di session
+
 if (!isset($_SESSION['loggedin']) || $_SERVER["REQUEST_METHOD"] != "POST" || !isset($_SESSION['pending_booking'])) {
     header("location: login.php");
     exit;
@@ -17,25 +17,26 @@ $car_id = $booking_details['car_id'];
 $start_date = $booking_details['start_date'];
 $end_date = $booking_details['end_date'];
 $total_price = $booking_details['total_price'];
-$pickup_location = $booking_details['pickup_location']; // Mengambil lokasi dari session
+$pickup_location = $booking_details['pickup_location'];
+$sim_image_url = $booking_details['sim_image_url'];
+$phone_number = $booking_details['phone_number']; // Ambil nomor telepon dari session
 
-$payment_method = $_POST['payment_method']; // 'Card' atau 'Cash'
+$payment_method = $_POST['payment_method']; 
 
-// --- MULAI TRANSAKSI DATABASE ---
 $conn->begin_transaction();
 
 try {
-    // Tentukan status awal berdasarkan metode pembayaran
-    $booking_status = 'pending'; // Status awal selalu 'pending' untuk konfirmasi admin
+    $booking_status = 'pending';
     $transaction_status = ($payment_method == 'Card') ? 'successful' : 'pending';
 
-    // 1. BUAT CATATAN BOOKING BARU (DENGAN LOKASI) DI DATABASE
-    $sql_booking = "INSERT INTO bookings (user_id, car_id, start_date, end_date, total_price, booking_status, pickup_location) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    // 1. BUAT CATATAN BOOKING BARU DI DATABASE
+    $sql_booking = "INSERT INTO bookings (user_id, car_id, start_date, end_date, total_price, booking_status, pickup_location, sim_image_url, phone_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt_booking = $conn->prepare($sql_booking);
-    $stmt_booking->bind_param("iissdss", $user_id, $car_id, $start_date, $end_date, $total_price, $booking_status, $pickup_location);
+    
+    // Update bind_param menjadi "iissdssss" untuk 3 string baru
+    $stmt_booking->bind_param("iissdssss", $user_id, $car_id, $start_date, $end_date, $total_price, $booking_status, $pickup_location, $sim_image_url, $phone_number);
     $stmt_booking->execute();
     
-    // Ambil ID dari booking yang baru saja dibuat
     $last_booking_id = $stmt_booking->insert_id;
     $stmt_booking->close();
 
@@ -46,24 +47,17 @@ try {
     $stmt_payment->execute();
     $stmt_payment->close();
     
-    // Jika semua query di atas berhasil, simpan perubahan ke database
     $conn->commit();
     
-    // --- PEMBERSIHAN DAN REDIRECT ---
-    // Hapus data booking dari session karena sudah berhasil disimpan
     unset($_SESSION['pending_booking']);
     
-    // Arahkan pengguna ke halaman struk/kwitansi
     header("Location: transaction_receipt.php?booking_id=" . $last_booking_id);
     exit();
 
 } catch (Exception $e) {
-    // Jika terjadi error di salah satu query, batalkan semua perubahan
     $conn->rollback();
-    // Tampilkan pesan error (dalam produksi, sebaiknya log error ini)
     die("Terjadi kesalahan saat memproses pesanan Anda. Silakan coba lagi. Error: " . $e->getMessage());
 } finally {
-    // Selalu tutup koneksi
     $conn->close();
 }
 ?>

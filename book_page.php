@@ -16,7 +16,6 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 require_once "config.php";
 
 // ---- AMBIL DATA MOBIL ----
-// Ambil ID mobil dari URL (misal: book_page.php?car_id=1)
 $selected_car_id = isset($_GET['car_id']) ? (int)$_GET['car_id'] : 0;
 $car = null;
 $all_cars = [];
@@ -51,7 +50,7 @@ if ($car === null && count($all_cars) > 0) {
     die("Mohon maaf, tidak ada mobil yang tersedia saat ini.");
 }
 
-$current_page = basename($_SERVER['PHP_SELF']); // Get current page filename
+$current_page = basename($_SERVER['PHP_SELF']);
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -59,13 +58,11 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get current page filename
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Complete Your Booking - Singgak</title>
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css"> <style>
+    <link rel="stylesheet" href="style.css">
+    <style>
         :root {
             --bs-primary-rgb: 245, 183, 84;
             --bs-dark-rgb: 22, 22, 22;
@@ -75,7 +72,6 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get current page filename
             padding-top: 80px;
             background-color: #f8f9fa;
         }
-        /* Removed .navbar inline style here, as it's now in style.css */
         .section-title { font-weight: 700; }
         .summary-card { position: sticky; top: 100px; }
         .btn-primary {
@@ -106,9 +102,9 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get current page filename
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav mx-auto">
-                    <li class="nav-item"><a class="nav-link <?php echo ($current_page == 'dashboard.php') ? 'active' : ''; ?>" href="dashboard.php">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="dashboard.php">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="dashboard.php#my-bookings">My Bookings</a></li>
-                    <li class="nav-item"><a class="nav-link <?php echo ($current_page == 'book_page.php') ? 'active' : ''; ?>" href="book_page.php">Book Now</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="book_page.php">Book Now</a></li>
                 </ul>
                 <div class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -136,7 +132,7 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get current page filename
             <div class="col-lg-7">
                 <div class="card border-0 shadow-sm p-4 rounded-4">
                     <div class="card-body">
-                        <form action="booking_handler.php" method="POST" id="bookingForm">
+                        <form action="booking_handler.php" method="POST" id="bookingForm" enctype="multipart/form-data">
 
                             <input type="hidden" name="user_id" value="<?php echo $_SESSION['user_id']; ?>">
                             <input type="hidden" name="car_id" value="<?php echo $car['id']; ?>">
@@ -172,11 +168,25 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get current page filename
                                     <label for="dropoffDate" class="form-label">Drop-off Date</label>
                                     <input type="date" class="form-control" id="dropoffDate" name="end_date" required onchange="calculatePrice()">
                                 </div>
+                                 <div class="col-12">
+                                    <label for="simUpload" class="form-label">Upload SIM (Surat Izin Mengemudi)</label>
+                                    <input class="form-control" type="file" id="simUpload" name="sim_upload" accept="image/png, image/jpeg, image/jpg" required>
+                                    <div class="form-text">
+                                        Wajib unggah foto SIM yang jelas. Format yang diterima: JPG, PNG.
+                                    </div>
+                                </div>
                                 <div class="col-12">
                                     <label for="pickupLocation" class="form-label">Pick-up Location</label>
                                     <input type="text" class="form-control" id="pickupLocation" name="pickup_location" placeholder="Masukkan alamat atau nama tempat (e.g., Epicentrum Mall)" required>
                                     <div class="form-text">
                                         Admin akan menggunakan lokasi ini di peta untuk penjemputan. Pastikan alamat jelas.
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <label for="phoneNumber" class="form-label">Contact Number (WhatsApp)</label>
+                                    <input type="tel" class="form-control" id="phoneNumber" name="phone_number" placeholder="Ex: 081234567890" required>
+                                    <div class="form-text">
+                                        Kami akan menghubungi nomor ini untuk konfirmasi pesanan.
                                     </div>
                                 </div>
                             </div>
@@ -221,15 +231,16 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get current page filename
     </main>
     
     <footer class="text-white pt-5 pb-4 mt-5">
-       </footer>
+       <div class="container text-center pt-4">
+            <p>&copy; <?php echo date("Y"); ?> Singgak. All rights reserved.</p>
+       </div>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Data mobil dari PHP diubah ke format JavaScript
         const carsData = <?php echo json_encode(array_column($all_cars, null, 'id')); ?>;
         
         function updateCar() {
-            // Arahkan ke halaman yang sama dengan car_id yang baru
             const selectedId = document.getElementById('carSelect').value;
             window.location.href = 'book_page.php?car_id=' + selectedId;
         }
@@ -237,13 +248,10 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get current page filename
         function calculatePrice() {
             const pickupDateElem = document.getElementById('pickupDate');
             const dropoffDateElem = document.getElementById('dropoffDate');
-            
             const pickupDate = new Date(pickupDateElem.value);
             const dropoffDate = new Date(dropoffDateElem.value);
             
-            // Validasi tanggal
             if (!pickupDateElem.value || !dropoffDateElem.value || dropoffDate <= pickupDate) {
-                // Reset harga jika tanggal tidak valid
                 document.getElementById('rentalDays').innerText = `0 days`;
                 document.getElementById('rentalFee').innerText = '$0';
                 document.getElementById('insuranceFee').innerText = '$0';
@@ -253,31 +261,27 @@ $current_page = basename($_SERVER['PHP_SELF']); // Get current page filename
             }
 
             const timeDiff = dropoffDate.getTime() - pickupDate.getTime();
-            const rentalDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
-            
+            const rentalDays = Math.max(1, Math.ceil(timeDiff / (1000 * 3600 * 24)));
             const carId = <?php echo $selected_car_id; ?>;
             const pricePerDay = parseFloat(carsData[carId].price_per_day);
-
             const rentalFee = rentalDays * pricePerDay;
-            const insuranceFee = 150; // Biaya asuransi tetap
-            const taxesFee = rentalFee * 0.10; // Pajak 10% dari biaya sewa
-            const totalPrice = rentalFee + insuranceFee + taxesFee;     
-            // Update UI
+            const insuranceFee = 150;
+            const taxes_fee = rentalFee * 0.10;
+            const totalPrice = rentalFee + insuranceFee + taxes_fee;
+
             document.getElementById('rentalDays').innerText = `${rentalDays} days`;
             document.getElementById('rentalFee').innerText = `$${rentalFee.toFixed(2)}`;
             document.getElementById('insuranceFee').innerText = `$${insuranceFee.toFixed(2)}`;
-            document.getElementById('taxesFee').innerText = `$${taxesFee.toFixed(2)}`;
+            document.getElementById('taxesFee').innerText = `$${taxes_fee.toFixed(2)}`;
             document.getElementById('totalPrice').innerText = `$${totalPrice.toFixed(2)}`;
         }
         
-        // Panggil fungsi saat halaman pertama kali dimuat untuk memastikan tanggal minimum
         document.addEventListener('DOMContentLoaded', function() {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('pickupDate').setAttribute('min', today);
             document.getElementById('dropoffDate').setAttribute('min', today);
             calculatePrice();
         });
-
     </script>
 </body>
 </html>

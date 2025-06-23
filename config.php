@@ -1,4 +1,6 @@
 <?php
+// config.php
+
 // --- Konfigurasi Database ---
 $db_host = 'localhost';     // Biasanya 'localhost'
 $db_user = 'root';          // User default XAMPP

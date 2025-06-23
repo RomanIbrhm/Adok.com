@@ -258,7 +258,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                                     <span><i class="fas fa-gas-pump me-1 text-primary"></i><?php echo htmlspecialchars($car['fuel_type']); ?></span>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center mt-auto">
-                                    <p class="card-text fs-4 fw-bold mb-0">$<?php echo number_format($car['price_per_day']); ?><small class="fw-normal text-muted">/day</small></p>
+                                    <p class="card-text fs-4 fw-bold mb-0">Rp.<?php echo number_format($car['price_per_day']); ?><small class="fw-normal text-muted">/day</small></p>
                                     <a href="book_page.php?car_id=<?php echo $car['id']; ?>" class="btn btn-primary btn-sm rounded-pill">Rent Now</a>
                                 </div>
                             </div>
@@ -315,7 +315,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                                             </p>
                                             <div class="d-flex justify-content-between align-items-center mb-3">
                                                 <span class="badge bg-success text-capitalize"><?php echo htmlspecialchars($booking['booking_status']); ?></span>
-                                                <span class="fw-bold fs-5 text-primary">$<?php echo number_format($booking['total_price'], 2); ?></span>
+                                                <span class="fw-bold fs-5 text-primary">Rp.<?php echo number_format($booking['total_price'], 2); ?></span>
                                             </div>
                                             <div class="mt-auto">
                                                 <a href="transaction_receipt.php?booking_id=<?php echo $booking['id']; ?>" class="btn btn-sm btn-outline-secondary">Lihat Struk</a>
