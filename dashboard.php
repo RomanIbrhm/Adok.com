@@ -248,7 +248,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                                     <?php for ($i = 0; $i < $empty_stars; $i++): ?><i class="far fa-star text-warning"></i><?php endfor; ?>
                                     
                                     <span class="ms-2 text-muted small review-link" data-bs-toggle="modal" data-bs-target="#allReviewsModal" data-car-id="<?php echo $car['id']; ?>" data-car-name="<?php echo htmlspecialchars($car['brand'] . ' ' . $car['model']); ?>">
-                                        (<?php echo $car['review_count']; ?> ulasan)
+                                        (<?php echo $car['review_count']; ?> review)
                                     </span>
                                 </div>
                                 

@@ -200,7 +200,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
                                     <?php for ($i = 0; $i < $full_stars; $i++): ?><i class="fas fa-star text-warning"></i><?php endfor; ?>
                                     <?php if ($half_star): ?><i class="fas fa-star-half-alt text-warning"></i><?php endif; ?>
                                     <?php for ($i = 0; $i < $empty_stars; $i++): ?><i class="far fa-star text-warning"></i><?php endfor; ?>
-                                    <span class="ms-2 text-muted small">(<?php echo $review_count; ?> ulasan)</span>
+                                    <span class="ms-2 text-muted small">(<?php echo $review_count; ?> review)</span>
                                 </div>
 
                                 <div class="d-flex justify-content-between text-muted small mb-3">
